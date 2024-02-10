@@ -2,6 +2,7 @@ package edu.java.bot;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import edu.java.bot.configuration.ApplicationConfig;
@@ -34,6 +35,11 @@ public class Bot implements UpdatesListener {
     }
 
     private SetMyCommands createMenu() {
-        return new SetMyCommands();
+        var commands = responseService.getCommands();
+        BotCommand[] botCommands = new BotCommand[commands.length];
+        for (var i = 0; i < commands.length; ++i) {
+            botCommands[i] = new BotCommand(commands[i].command(), commands[i].description());
+        }
+        return new SetMyCommands(botCommands);
     }
 }

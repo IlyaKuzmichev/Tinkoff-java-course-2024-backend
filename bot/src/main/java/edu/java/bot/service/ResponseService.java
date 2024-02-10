@@ -6,6 +6,7 @@ import edu.java.bot.database.User;
 import edu.java.bot.database.UserRegistry;
 import edu.java.bot.database.UserState;
 import edu.java.bot.processor.LinkChecker;
+import edu.java.bot.processor.commands.Command;
 import edu.java.bot.processor.commands.CommandHandler;
 import java.util.Optional;
 
@@ -26,6 +27,10 @@ public class ResponseService {
         userRegistry = new UserRegistry();
         linkChecker = new LinkChecker();
         commandHandler = new CommandHandler(userRegistry);
+    }
+
+    public Command[] getCommands() {
+        return commandHandler.getCommandList();
     }
 
     public SendMessage getAnswer(Update update) {
