@@ -1,18 +1,23 @@
 package edu.java.bot.processor;
 
-import edu.java.bot.processor.link_trackers.TrackerHandler;
+import edu.java.bot.processor.trackers.GitHubTracker;
+import edu.java.bot.processor.trackers.StackOverflowTracker;
+import edu.java.bot.processor.trackers.URITracker;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 public class LinkChecker {
     private static final String INVALID_LINK = "INVALID";
     private String host;
-    private final TrackerHandler trackerHandler;
+    private final URITracker trackers;
 
-    public LinkChecker(String link, TrackerHandler trackerHandler) {
-        this.trackerHandler = trackerHandler;
+    public LinkChecker() {
+        trackers = new GitHubTracker(new StackOverflowTracker(null));
+    }
+
+    public void loadLink(String link) {
         try {
-            this.host = new URI(link).getHost();
+            host = new URI(link).getHost();
         } catch (URISyntaxException e) {
             this.host = INVALID_LINK;
         }
@@ -20,7 +25,6 @@ public class LinkChecker {
             host = INVALID_LINK;
         }
     }
-
 
     public boolean isValidLink() {
         return !host.equals(INVALID_LINK);
@@ -31,6 +35,6 @@ public class LinkChecker {
     }
 
     public boolean isPossibleToTrack() {
-        return trackerHandler.isValidResourceForTracking(host);
+        return trackers.checkResource(host);
     }
 }

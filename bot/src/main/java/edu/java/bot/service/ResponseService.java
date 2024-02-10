@@ -7,7 +7,6 @@ import edu.java.bot.database.UserRegistry;
 import edu.java.bot.database.UserState;
 import edu.java.bot.processor.LinkChecker;
 import edu.java.bot.processor.commands.CommandHandler;
-import edu.java.bot.processor.link_trackers.TrackerHandler;
 import java.util.Optional;
 
 public class ResponseService {
@@ -20,13 +19,13 @@ public class ResponseService {
     private static final String NOT_SUPPORTED = "Operation not supported";
     private static final String NEED_REGISTRATION = "Please, pass the registration with /start command";
     private final CommandHandler commandHandler;
-    private final TrackerHandler trackerHandler;
+    private final LinkChecker linkChecker;
     private final UserRegistry userRegistry;
 
     public ResponseService() {
         userRegistry = new UserRegistry();
+        linkChecker = new LinkChecker();
         commandHandler = new CommandHandler(userRegistry);
-        trackerHandler = new TrackerHandler(userRegistry);
     }
 
     public SendMessage getAnswer(Update update) {
@@ -51,14 +50,14 @@ public class ResponseService {
     }
 
     private String userTrackingProcess(User user, String link) {
-        LinkChecker checker = new LinkChecker(link, trackerHandler);
-        if (!checker.isValidLink()) {
+        linkChecker.loadLink(link);
+        if (!linkChecker.isValidLink()) {
             return NOT_VALID_LINK;
         }
-        if (!checker.isPossibleToTrack()) {
+        if (!linkChecker.isPossibleToTrack()) {
             return NOT_VALID_RESOURCE;
         }
-        return linkProcess(user, checker.getHost(), link);
+        return linkProcess(user, linkChecker.getHost(), link);
     }
 
     private String linkProcess(User user, String domain, String link) {

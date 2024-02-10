@@ -26,7 +26,9 @@ public class Bot implements UpdatesListener {
     @Override
     public int process(List<Update> list) {
         for (var update : list) {
-            bot.execute(responseService.getAnswer(update));
+            if (update.message() != null) {
+                bot.execute(responseService.getAnswer(update));
+            }
         }
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
