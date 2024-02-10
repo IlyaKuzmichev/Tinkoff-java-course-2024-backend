@@ -1,4 +1,4 @@
-package edu.java.bot.command;
+package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.UserRegistry;
@@ -9,6 +9,7 @@ public abstract class Command {
     private Command nextCommand;
 
     public Command() {}
+
     public Command(UserRegistry userRegistry) {
         this.userRegistry = userRegistry;
     }

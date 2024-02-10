@@ -1,11 +1,10 @@
 package edu.java.bot.database;
 
-import java.net.URI;
 import java.util.HashSet;
 
 public class User {
     private final Long id;
-    private final HashSet<URI> links;
+    private final HashSet<String> links;
     private UserState state;
 
     public User(Long id) {
@@ -18,7 +17,7 @@ public class User {
         return id;
     }
 
-    public HashSet<URI> getLinks() {
+    public HashSet<String> getLinks() {
         return links;
     }
 
@@ -30,7 +29,7 @@ public class User {
         this.state = state;
     }
 
-    public boolean IsTracking(URI uri) {
+    public boolean isTracking(String uri) {
         return links.contains(uri);
     }
 }

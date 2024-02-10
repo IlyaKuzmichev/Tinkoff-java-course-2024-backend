@@ -1,4 +1,4 @@
-package edu.java.bot.command;
+package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.UserRegistry;
@@ -12,7 +12,7 @@ final class ListCommand extends Command {
     private static final String FIRST_LINE = "Your tracking links:\n";
     private static final String FORMATTED_STRING = "%d. %s\n";
 
-    public ListCommand(UserRegistry userRegistry) {
+    ListCommand(UserRegistry userRegistry) {
         super(userRegistry);
     }
 
@@ -39,7 +39,7 @@ final class ListCommand extends Command {
         builder.append(FIRST_LINE);
         int counter = 1;
         for (var link : user.get().getLinks()) {
-            builder.append(FORMATTED_STRING.formatted(counter++, link.toString()));
+            builder.append(FORMATTED_STRING.formatted(counter++, link));
         }
 
         return Optional.of(builder.toString());

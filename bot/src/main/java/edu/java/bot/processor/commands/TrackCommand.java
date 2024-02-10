@@ -1,4 +1,4 @@
-package edu.java.bot.command;
+package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.UserRegistry;
@@ -8,7 +8,8 @@ import java.util.Optional;
 final class TrackCommand extends Command {
     private static final String NO_REGISTRATION = "You need to be registered for tracking links";
     private static final String LINK_INVITATION = "Input the link for tracking";
-    public TrackCommand(UserRegistry userRegistry) {
+
+    TrackCommand(UserRegistry userRegistry) {
         super(userRegistry);
     }
 

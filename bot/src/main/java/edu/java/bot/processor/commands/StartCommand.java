@@ -1,4 +1,4 @@
-package edu.java.bot.command;
+package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.User;
@@ -8,7 +8,8 @@ import java.util.Optional;
 final class StartCommand extends Command {
     private static final String REGISTRATION_SUCCESS = "You were successfully registered";
     private static final String ALLREADY_REGISTERED = "You're allready registered";
-    public StartCommand(UserRegistry userRegistry) {
+
+    StartCommand(UserRegistry userRegistry) {
         super(userRegistry);
     }
 

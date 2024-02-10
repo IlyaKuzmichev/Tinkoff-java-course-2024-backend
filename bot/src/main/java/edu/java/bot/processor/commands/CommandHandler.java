@@ -1,14 +1,15 @@
-package edu.java.bot.command;
+package edu.java.bot.processor.commands;
 
 import edu.java.bot.database.UserRegistry;
-import org.apache.catalina.User;
 import java.util.ArrayList;
-import java.util.Optional;
+
+
 
 public class CommandHandler {
-    private final ArrayList<Command> commandList = new ArrayList<>();
+    private final ArrayList<Command> commandList;
 
     public CommandHandler(UserRegistry userRegistry) {
+        commandList = new ArrayList<>();
         commandList.add(new StartCommand(userRegistry));
         commandList.add(new TrackCommand(userRegistry));
         commandList.add(new UntrackCommand(userRegistry));

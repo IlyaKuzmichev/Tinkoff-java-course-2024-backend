@@ -1,4 +1,4 @@
-package edu.java.bot.command;
+package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import java.util.ArrayList;
@@ -11,8 +11,7 @@ final class HelpCommand extends Command {
     private static final String FORMATTED_STRING = "%s - %s\n";
     ArrayList<Command> commandList;
 
-    public HelpCommand(ArrayList<Command> commandList) {
-        super();
+    HelpCommand(ArrayList<Command> commandList) {
         this.commandList = commandList;
     }
 
