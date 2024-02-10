@@ -13,7 +13,7 @@ public class Bot implements UpdatesListener {
     private final ResponseService responseService;
 
     public Bot() {
-        ApplicationConfig appConfig = new ApplicationConfig("6719599434:AAG7db_6bif093UbW6gP7jSdc2vVWiVdwvk");
+        ApplicationConfig appConfig = new ApplicationConfig(System.getenv("TELEGRAM_API_KEY"));
         bot = new TelegramBot(appConfig.telegramToken());
         responseService = new ResponseService();
     }
