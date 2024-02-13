@@ -1,7 +1,6 @@
 package edu.java.bot.processor.commands;
 
 import edu.java.bot.database.UserRegistry;
-import java.nio.charset.CoderMalfunctionError;
 import java.util.ArrayList;
 
 
@@ -29,6 +28,7 @@ public class CommandHandler {
         }
         return array;
     }
+
     public Command chainStart() {
         return commandList.get(0);
     }
