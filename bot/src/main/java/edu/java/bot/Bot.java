@@ -4,6 +4,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import edu.java.bot.service.ResponseService;
 import java.util.List;
@@ -26,7 +27,7 @@ public class Bot implements UpdatesListener {
     public int process(List<Update> list) {
         for (var update : list) {
             if (update.message() != null) {
-                bot.execute(responseService.getAnswer(update));
+                bot.execute(new SendMessage(update.message().chat().id(), responseService.getAnswer(update)));
             }
         }
         return UpdatesListener.CONFIRMED_UPDATES_ALL;

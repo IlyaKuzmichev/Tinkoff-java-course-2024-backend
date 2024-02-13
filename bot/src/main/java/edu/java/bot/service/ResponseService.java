@@ -1,7 +1,6 @@
 package edu.java.bot.service;
 
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.database.User;
 import edu.java.bot.database.UserRegistry;
 import edu.java.bot.database.UserState;
@@ -34,25 +33,23 @@ public class ResponseService {
         return commandHandler.getCommandList();
     }
 
-    public SendMessage getAnswer(Update update) {
+    public String getAnswer(Update update) {
         var user = userRegistry.getUser(update.message().chat().id());
         Optional<String> result = Optional.empty();
         if (user.isEmpty() || user.get().getState() == UserState.BASE) {
             result = commandHandler.handle(update);
         }
-        return result.map(s -> new SendMessage(update.message().chat().id(), s))
-            .orElseGet(() -> nonCommandHandler(update));
+        return result.isPresent() ? result.get() : nonCommandHandler(update);
     }
 
-    private SendMessage nonCommandHandler(Update update) {
+    private String nonCommandHandler(Update update) {
         var user = userRegistry.getUser(update.message().chat().id());
         if (user.isPresent() && user.get().getState() != UserState.BASE) {
-            var message = new SendMessage(user.get().getId(), userTrackingProcess(user.get(), update.message().text()));
+            var message = userTrackingProcess(user.get(), update.message().text());
             user.get().setState(UserState.BASE);
             return message;
         }
-        String returnStr = user.isPresent() ? NOT_SUPPORTED : NEED_REGISTRATION;
-        return new SendMessage(update.message().chat().id(), returnStr);
+        return user.isPresent() ? NOT_SUPPORTED : NEED_REGISTRATION;
     }
 
     private String userTrackingProcess(User user, String link) {
