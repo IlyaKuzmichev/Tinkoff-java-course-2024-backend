@@ -5,11 +5,11 @@ import edu.java.bot.database.UserRegistry;
 import edu.java.bot.database.UserState;
 import java.util.Optional;
 
-final class TrackCommand extends Command {
+public final class TrackCommand extends Command {
     private static final String NO_REGISTRATION = "You need to be registered for tracking links";
     private static final String LINK_INVITATION = "Input the link for tracking";
 
-    TrackCommand(UserRegistry userRegistry) {
+    public TrackCommand(UserRegistry userRegistry) {
         super(userRegistry);
     }
 

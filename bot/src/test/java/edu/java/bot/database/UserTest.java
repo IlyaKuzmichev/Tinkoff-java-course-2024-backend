@@ -1,6 +1,7 @@
 package edu.java.bot.database;
 
 import org.junit.jupiter.api.Test;
+import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -17,5 +18,7 @@ public class UserTest {
         assertFalse(user.isTracking("aboba"));
         user.setState(UserState.WAIT_TRACK_URI);
         assertEquals(UserState.WAIT_TRACK_URI, user.getState());
+
+
     }
 }

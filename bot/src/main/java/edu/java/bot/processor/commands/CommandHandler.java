@@ -21,12 +21,8 @@ public class CommandHandler {
         }
     }
 
-    public Command[] getCommandList() {
-        Command[] array = new Command[commandList.size()];
-        for (var i = 0; i < commandList.size(); ++i) {
-            array[i] = commandList.get(i);
-        }
-        return array;
+    public ArrayList<Command> getCommandList() {
+        return commandList;
     }
 
     public Optional<String> handle(Update update) {

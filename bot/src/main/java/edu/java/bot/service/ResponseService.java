@@ -8,6 +8,7 @@ import edu.java.bot.database.UserState;
 import edu.java.bot.processor.LinkChecker;
 import edu.java.bot.processor.commands.Command;
 import edu.java.bot.processor.commands.CommandHandler;
+import java.util.ArrayList;
 import java.util.Optional;
 
 public class ResponseService {
@@ -29,7 +30,7 @@ public class ResponseService {
         this.commandHandler = commandHandler;
     }
 
-    public Command[] getCommands() {
+    public ArrayList<Command> getCommands() {
         return commandHandler.getCommandList();
     }
 

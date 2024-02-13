@@ -4,14 +4,14 @@ import com.pengrad.telegrambot.model.Update;
 import java.util.ArrayList;
 import java.util.Optional;
 
-final class HelpCommand extends Command {
+public final class HelpCommand extends Command {
     private static final String COMMAND = "/help";
     private static final String DESCRIPTION = "Print instructions for the bot";
     private static final String FIRST_STRING = "Allowed commands for bot:\n";
     private static final String FORMATTED_STRING = "%s - %s\n";
     ArrayList<Command> commandList;
 
-    HelpCommand(ArrayList<Command> commandList) {
+    public HelpCommand(ArrayList<Command> commandList) {
         this.commandList = commandList;
     }
 

@@ -5,12 +5,12 @@ import edu.java.bot.database.UserRegistry;
 import edu.java.bot.database.UserState;
 import java.util.Optional;
 
-final class UntrackCommand extends Command {
+public final class UntrackCommand extends Command {
     private static final String NO_REGISTRATION = "You need to be registered for tracking links";
     private static final String EMPTY_LINK_LIST = "You have no tracking links";
     private static final String LINK_INVITATION = "Input link for untracking";
 
-    UntrackCommand(UserRegistry userRegistry) {
+    public UntrackCommand(UserRegistry userRegistry) {
         super(userRegistry);
     }
 

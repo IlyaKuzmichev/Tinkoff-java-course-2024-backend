@@ -4,15 +4,15 @@ import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.UserRegistry;
 import java.util.Optional;
 
-final class ListCommand extends Command {
+public final class ListCommand extends Command {
     private static final String COMMAND = "/list";
-    private static final String DESCRIPTION = "Show list of tracking links";
+    private static final String DESCRIPTION = "Shows list of tracking links";
     private static final String NO_REGISTRATION = "Need to be registered for tracking links";
     private static final String NO_LINKS = "You have no links for tracking";
     private static final String FIRST_LINE = "Your tracking links:\n";
     private static final String FORMATTED_STRING = "%d. %s\n";
 
-    ListCommand(UserRegistry userRegistry) {
+    public ListCommand(UserRegistry userRegistry) {
         super(userRegistry);
     }
 

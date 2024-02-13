@@ -5,11 +5,11 @@ import edu.java.bot.database.User;
 import edu.java.bot.database.UserRegistry;
 import java.util.Optional;
 
-final class StartCommand extends Command {
+public final class StartCommand extends Command {
     private static final String REGISTRATION_SUCCESS = "You were successfully registered";
-    private static final String ALLREADY_REGISTERED = "You're allready registered";
+    private static final String ALREADY_REGISTERED = "You're already registered";
 
-    StartCommand(UserRegistry userRegistry) {
+    public StartCommand(UserRegistry userRegistry) {
         super(userRegistry);
     }
 
@@ -30,6 +30,6 @@ final class StartCommand extends Command {
             userRegistry.putUser(new User(userId));
             return Optional.of(REGISTRATION_SUCCESS);
         }
-        return Optional.of(ALLREADY_REGISTERED);
+        return Optional.of(ALREADY_REGISTERED);
     }
 }

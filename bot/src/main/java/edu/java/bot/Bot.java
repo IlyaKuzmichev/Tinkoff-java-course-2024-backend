@@ -34,9 +34,9 @@ public class Bot implements UpdatesListener {
 
     private SetMyCommands createMenu() {
         var commands = responseService.getCommands();
-        BotCommand[] botCommands = new BotCommand[commands.length];
-        for (var i = 0; i < commands.length; ++i) {
-            botCommands[i] = new BotCommand(commands[i].command(), commands[i].description());
+        BotCommand[] botCommands = new BotCommand[commands.size()];
+        for (var i = 0; i < commands.size(); ++i) {
+            botCommands[i] = new BotCommand(commands.get(i).command(), commands.get(i).description());
         }
         return new SetMyCommands(botCommands);
     }
