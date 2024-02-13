@@ -5,7 +5,6 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SetMyCommands;
-import edu.java.bot.configuration.ApplicationConfig;
 import edu.java.bot.service.ResponseService;
 import java.util.List;
 
@@ -13,10 +12,9 @@ public class Bot implements UpdatesListener {
     private final TelegramBot bot;
     private final ResponseService responseService;
 
-    public Bot() {
-        ApplicationConfig appConfig = new ApplicationConfig(System.getenv("TELEGRAM_API_KEY"));
-        bot = new TelegramBot(appConfig.telegramToken());
-        responseService = new ResponseService();
+    public Bot(TelegramBot bot, ResponseService responseService) {
+        this.bot = bot;
+        this.responseService = responseService;
     }
 
     public void start() {

@@ -1,9 +1,9 @@
 package edu.java.bot.processor.commands;
 
+import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.UserRegistry;
 import java.util.ArrayList;
-
-
+import java.util.Optional;
 
 public class CommandHandler {
     private final ArrayList<Command> commandList;
@@ -29,8 +29,8 @@ public class CommandHandler {
         return array;
     }
 
-    public Command chainStart() {
-        return commandList.get(0);
+    public Optional<String> handle(Update update) {
+        return commandList.get(0).handle(update);
     }
 
 }

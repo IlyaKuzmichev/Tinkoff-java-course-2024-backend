@@ -1,7 +1,5 @@
 package edu.java.bot.processor;
 
-import edu.java.bot.processor.trackers.GitHubTracker;
-import edu.java.bot.processor.trackers.StackOverflowTracker;
 import edu.java.bot.processor.trackers.URITracker;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -11,8 +9,9 @@ public class LinkChecker {
     private String host;
     private final URITracker trackers;
 
-    public LinkChecker() {
-        trackers = new GitHubTracker(new StackOverflowTracker(null));
+    public LinkChecker(URITracker trackers) {
+
+        this.trackers = trackers;
     }
 
     public void loadLink(String link) {

@@ -23,10 +23,10 @@ public class ResponseService {
     private final LinkChecker linkChecker;
     private final UserRegistry userRegistry;
 
-    public ResponseService() {
-        userRegistry = new UserRegistry();
-        linkChecker = new LinkChecker();
-        commandHandler = new CommandHandler(userRegistry);
+    public ResponseService(CommandHandler commandHandler, UserRegistry userRegistry, LinkChecker linkChecker) {
+        this.userRegistry = userRegistry;
+        this.linkChecker = linkChecker;
+        this.commandHandler = commandHandler;
     }
 
     public Command[] getCommands() {
@@ -37,7 +37,7 @@ public class ResponseService {
         var user = userRegistry.getUser(update.message().chat().id());
         Optional<String> result = Optional.empty();
         if (user.isEmpty() || user.get().getState() == UserState.BASE) {
-            result = commandHandler.chainStart().handle(update);
+            result = commandHandler.handle(update);
         }
         return result.map(s -> new SendMessage(update.message().chat().id(), s))
             .orElseGet(() -> nonCommandHandler(update));
