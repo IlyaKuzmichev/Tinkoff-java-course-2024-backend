@@ -39,7 +39,7 @@ public class ResponseService {
         if (user.isEmpty() || user.get().getState() == UserState.BASE) {
             result = commandHandler.handle(update);
         }
-        return result.isPresent() ? result.get() : nonCommandHandler(update);
+        return result.orElseGet(() -> nonCommandHandler(update));
     }
 
     private String nonCommandHandler(Update update) {

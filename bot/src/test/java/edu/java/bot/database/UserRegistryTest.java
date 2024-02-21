@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserRegistryTest {
 
-    private static final String linkHub = "https://github.com";
-    private static final String linkStack = "https://stackoverflow.com";
+    private static final String LINK_GITHUB = "https://github.com";
+    private static final String LINK_STACK_OVERFLOW = "https://stackoverflow.com";
 
     @Test
     public void testUserRegistryStorage() {
@@ -28,27 +28,27 @@ public class UserRegistryTest {
         assertEquals(registry.getUser(3L), Optional.of(user3));
         assertEquals(registry.getUser(4L), Optional.empty());
 
-        registry.addLink(user1, linkHub, linkHub);
+        registry.addLink(user1, LINK_GITHUB, LINK_GITHUB);
 
         assertThat(registry.getUser(1L).get().getLinks().size()).isEqualTo(1);
-        assertTrue(user1.getLinks().contains(linkHub));
-        assertFalse(user1.getLinks().contains(linkStack));
+        assertTrue(user1.getLinks().contains(LINK_GITHUB));
+        assertFalse(user1.getLinks().contains(LINK_STACK_OVERFLOW));
 
-        registry.addLink(user2, linkStack, linkStack);
-        registry.addLink(user2, linkStack, linkStack);
-        registry.addLink(user2, linkStack, linkStack);
+        registry.addLink(user2, LINK_STACK_OVERFLOW, LINK_STACK_OVERFLOW);
+        registry.addLink(user2, LINK_STACK_OVERFLOW, LINK_STACK_OVERFLOW);
+        registry.addLink(user2, LINK_STACK_OVERFLOW, LINK_STACK_OVERFLOW);
 
         assertThat(registry.getUser(2L).get().getLinks().size()).isEqualTo(1);
-        assertTrue(user2.getLinks().contains(linkStack));
-        assertFalse(user2.getLinks().contains(linkHub));
+        assertTrue(user2.getLinks().contains(LINK_STACK_OVERFLOW));
+        assertFalse(user2.getLinks().contains(LINK_GITHUB));
 
-        registry.addLink(user3, linkStack, linkStack);
-        registry.addLink(user3, linkHub, linkHub);
+        registry.addLink(user3, LINK_STACK_OVERFLOW, LINK_STACK_OVERFLOW);
+        registry.addLink(user3, LINK_GITHUB, LINK_GITHUB);
         assertThat(user3.getLinks().size()).isEqualTo(2);
 
-        registry.removeLink(user3, linkStack, linkStack);
-        assertTrue(user3.getLinks().contains(linkHub));
-        assertFalse(user3.getLinks().contains(linkStack));
+        registry.removeLink(user3, LINK_STACK_OVERFLOW, LINK_STACK_OVERFLOW);
+        assertTrue(user3.getLinks().contains(LINK_GITHUB));
+        assertFalse(user3.getLinks().contains(LINK_STACK_OVERFLOW));
         assertEquals(user3.getLinks().size(), 1);
     }
 }

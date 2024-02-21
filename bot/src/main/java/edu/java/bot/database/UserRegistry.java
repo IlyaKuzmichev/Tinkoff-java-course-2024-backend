@@ -1,12 +1,13 @@
 package edu.java.bot.database;
 
+import lombok.Getter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 
 public class UserRegistry {
     private final HashMap<Long, User> users;
-    private final HashMap<String, HashSet<String>> domainLinks;
+    @Getter private final HashMap<String, HashSet<String>> domainLinks;
     private final HashMap<String, HashSet<User>> usersTrackedLinks;
 
     public UserRegistry() {
@@ -16,15 +17,11 @@ public class UserRegistry {
     }
 
     public Optional<User> getUser(Long id) {
-        return users.containsKey(id) ? Optional.of(users.get(id)) : Optional.empty();
+        return Optional.ofNullable(users.get(id));
     }
 
     public void putUser(User user) {
         users.put(user.getId(), user);
-    }
-
-    public HashMap<String, HashSet<String>> getDomainLinks() {
-        return domainLinks;
     }
 
     public boolean addLink(User user, String domain, String link) {
@@ -32,14 +29,8 @@ public class UserRegistry {
         if (!success) {
             return false;
         }
-        if (!usersTrackedLinks.containsKey(link)) {
-            usersTrackedLinks.put(link, new HashSet<>());
-        }
-        usersTrackedLinks.get(link).add(user);
-        if (!domainLinks.containsKey(domain)) {
-            domainLinks.put(domain, new HashSet<>());
-        }
-        domainLinks.get(domain).add(link);
+        usersTrackedLinks.computeIfAbsent(link, k -> new HashSet<>()).add(user);
+        domainLinks.computeIfAbsent(domain, k -> new HashSet<>()).add(link);
         return true;
     }
 
@@ -48,8 +39,9 @@ public class UserRegistry {
         if (!success) {
             return false;
         }
-        usersTrackedLinks.get(link).remove(user);
-        if (usersTrackedLinks.get(link).size() == 0) {
+        var usersTracking = usersTrackedLinks.get(link);
+        usersTracking.remove(user);
+        if (usersTracking.isEmpty()) {
             domainLinks.get(domain).remove(link);
         }
         return true;
