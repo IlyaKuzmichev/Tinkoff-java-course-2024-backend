@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ListCommandTest extends CommandTest{
@@ -16,26 +17,21 @@ public class ListCommandTest extends CommandTest{
         list = new ListCommand(userRegistry);
     }
 
-    @BeforeEach
-    public void mocMessageText() {
-        Mockito.doReturn("/list").when(message).text();
-    }
-
     @Test
     public void testEmptyListOfUserLinks() {
         User user = new User(chatId);
         userRegistry.putUser(user);
 
-        var returnMessage = list.handle(update);
-        assertTrue(returnMessage.isPresent());
-        assertEquals(returnMessage.get(), "You have no links for tracking");
+        var returnMessage = list.execute(update);
+        assertFalse(returnMessage.isEmpty());
+        assertEquals(returnMessage, "You have no links for tracking");
     }
 
     @Test
     public void testUnregisteredUserTryToGetLinks() {
-        var returnMessage = list.handle(update);
-        assertTrue(returnMessage.isPresent());
-        assertEquals(returnMessage.get(), "Need to be registered for tracking links");
+        var returnMessage = list.execute(update);
+        assertFalse(returnMessage.isEmpty());
+        assertEquals(returnMessage, "Need to be registered for tracking links");
     }
 
     @Test
@@ -44,10 +40,10 @@ public class ListCommandTest extends CommandTest{
         userRegistry.putUser(user);
         userRegistry.addLink(user, "abc", "abc");
 
-        var returnMessage = list.handle(update);
-        assertTrue(returnMessage.isPresent());
-        assertTrue(returnMessage.get().startsWith("Your tracking links:"));
-        assertTrue(returnMessage.get().endsWith("abc\n"));
+        var returnMessage = list.execute(update);
+        assertFalse(returnMessage.isEmpty());
+        assertTrue(returnMessage.startsWith("Your tracking links:"));
+        assertTrue(returnMessage.endsWith("abc\n"));
     }
 
     @Test
@@ -58,9 +54,9 @@ public class ListCommandTest extends CommandTest{
         userRegistry.addLink(user, "B", "B");
         userRegistry.addLink(user, "C", "C");
 
-        var returnMessage = list.handle(update);
-        assertTrue(returnMessage.isPresent());
-        assertTrue(returnMessage.get().startsWith("Your tracking"));
-        assertTrue(returnMessage.get().endsWith("2. B\n3. C\n"));
+        var returnMessage = list.execute(update);
+        assertFalse(returnMessage.isEmpty());
+        assertTrue(returnMessage.startsWith("Your tracking"));
+        assertTrue(returnMessage.endsWith("2. B\n3. C\n"));
     }
 }

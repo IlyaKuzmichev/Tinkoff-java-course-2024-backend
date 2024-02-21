@@ -1,12 +1,12 @@
 package edu.java.bot.database;
 
-import lombok.Getter;
-import org.springframework.stereotype.Repository;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import lombok.Getter;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class UserRegistry {

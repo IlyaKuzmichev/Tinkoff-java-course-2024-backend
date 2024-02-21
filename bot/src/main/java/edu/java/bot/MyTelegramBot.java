@@ -6,15 +6,18 @@ import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
+import edu.java.bot.processor.commands.Command;
 import edu.java.bot.service.ResponseService;
 import java.util.List;
 
 public class MyTelegramBot implements UpdatesListener {
     private final TelegramBot bot;
     private final ResponseService responseService;
+    private final List<Command> commandList;
 
-    public MyTelegramBot(TelegramBot bot, ResponseService responseService) {
+    public MyTelegramBot(TelegramBot bot, List<Command> commandList, ResponseService responseService) {
         this.bot = bot;
+        this.commandList = commandList;
         this.responseService = responseService;
     }
 
@@ -34,11 +37,8 @@ public class MyTelegramBot implements UpdatesListener {
     }
 
     private SetMyCommands createMenu() {
-        var commands = responseService.getCommands();
-        BotCommand[] botCommands = new BotCommand[commands.size()];
-        for (var i = 0; i < commands.size(); ++i) {
-            botCommands[i] = new BotCommand(commands.get(i).command(), commands.get(i).description());
-        }
-        return new SetMyCommands(botCommands);
+        return new SetMyCommands(commandList.stream()
+            .map(Command::toApiCommand)
+            .toArray(BotCommand[]::new));
     }
 }

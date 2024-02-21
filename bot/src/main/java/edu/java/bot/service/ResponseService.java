@@ -6,10 +6,9 @@ import edu.java.bot.database.UserRegistry;
 import edu.java.bot.database.UserState;
 import edu.java.bot.processor.LinkChecker;
 import edu.java.bot.processor.commands.Command;
-import edu.java.bot.processor.commands.CommandHandler;
+import java.util.Map;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.Optional;
+
 
 @Service
 public class ResponseService {
@@ -21,27 +20,26 @@ public class ResponseService {
     private static final String SUCCESS_REMOVE = "Link successfully removed from tracking list";
     private static final String NOT_SUPPORTED = "Operation not supported";
     private static final String NEED_REGISTRATION = "Please, pass the registration with /start command";
-    private final CommandHandler commandHandler;
+    private final Map<String, Command> commandMap;
     private final LinkChecker linkChecker;
     private final UserRegistry userRegistry;
 
-    public ResponseService(CommandHandler commandHandler, UserRegistry userRegistry, LinkChecker linkChecker) {
+    public ResponseService(Map<String, Command> commandMap, UserRegistry userRegistry, LinkChecker linkChecker) {
+        this.commandMap = commandMap;
         this.userRegistry = userRegistry;
         this.linkChecker = linkChecker;
-        this.commandHandler = commandHandler;
-    }
-
-    public ArrayList<Command> getCommands() {
-        return commandHandler.getCommandList();
     }
 
     public String getAnswer(Update update) {
-        var user = userRegistry.getUser(update.message().chat().id());
-        Optional<String> result = Optional.empty();
-        if (user.isEmpty() || user.get().getState() == UserState.BASE) {
-            result = commandHandler.handle(update);
+        var message = update.message().text();
+        if (message.startsWith("/")) {
+            if (commandMap.containsKey(message)) {
+                return commandMap.get(message).execute(update);
+            } else {
+                return NOT_SUPPORTED;
+            }
         }
-        return result.orElseGet(() -> nonCommandHandler(update));
+        return nonCommandHandler(update);
     }
 
     private String nonCommandHandler(Update update) {

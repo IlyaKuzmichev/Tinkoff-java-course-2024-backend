@@ -3,33 +3,40 @@ package edu.java.bot.processor.commands;
 import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.UserRegistry;
 import edu.java.bot.database.UserState;
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
-public final class TrackCommand extends Command {
+@Component("/track")
+@Qualifier("action_command")
+public final class TrackCommand implements Command {
+    private static final String NAME = "/track";
+    private static final String DESCRIPTION = "Add new link for tracking";
     private static final String NO_REGISTRATION = "You need to be registered for tracking links";
     private static final String LINK_INVITATION = "Input the link for tracking";
+    UserRegistry userRegistry;
 
     public TrackCommand(UserRegistry userRegistry) {
-        super(userRegistry);
+        this.userRegistry = userRegistry;
     }
 
     @Override
-    public String command() {
-        return "/track";
+    public String commandName() {
+        return NAME;
     }
 
     @Override
-    public String description() {
-        return "Add new link for tracking";
+    public String commandDescription() {
+        return DESCRIPTION;
     }
 
     @Override
-    protected Optional<String> execute(Update update) {
+    public String execute(Update update) {
         var userId = update.message().chat().id();
         if (userRegistry.getUser(userId).isEmpty()) {
-            return Optional.of(NO_REGISTRATION);
+            return NO_REGISTRATION;
         }
         userRegistry.getUser(userId).get().setState(UserState.WAIT_TRACK_URI);
-        return Optional.of(LINK_INVITATION);
+        return LINK_INVITATION;
     }
 }
+

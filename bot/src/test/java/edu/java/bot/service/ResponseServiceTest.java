@@ -7,13 +7,14 @@ import edu.java.bot.database.User;
 import edu.java.bot.database.UserRegistry;
 import edu.java.bot.database.UserState;
 import edu.java.bot.processor.LinkChecker;
-import edu.java.bot.processor.commands.CommandHandler;
+import edu.java.bot.processor.commands.Command;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Map;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -28,9 +29,9 @@ public class ResponseServiceTest {
     @Mock
     private UserRegistry userRegistry;
     @Mock
-    private CommandHandler commandHandler;
-    @Mock
     private LinkChecker linkChecker;
+    @Mock
+    private Map<String, Command> commandMap;
     @Mock
     private User user;
     Long chatId;
@@ -43,7 +44,7 @@ public class ResponseServiceTest {
         Mockito.doReturn(chat).when(message).chat();
         Mockito.doReturn(chatId).when(chat).id();
 
-        responseService = new ResponseService(commandHandler, userRegistry, linkChecker);
+        responseService = new ResponseService(commandMap, userRegistry, linkChecker);
     }
     @Test
     public void testLinkAddProcess() {
@@ -114,6 +115,7 @@ public class ResponseServiceTest {
 
     @Test
     public void testNotValidMessageForTheBotReceived() {
+        Mockito.doReturn("aboba").when(message).text();
         Mockito.doReturn(Optional.of(user)).when(userRegistry).getUser(chatId);
         Mockito.doReturn(UserState.BASE).when(user).getState();
         assertEquals("Operation not supported", responseService.getAnswer(update));
@@ -122,14 +124,8 @@ public class ResponseServiceTest {
     @Test
     public void testNoRegistrationOfUser() {
         Mockito.doReturn(Optional.empty()).when(userRegistry).getUser(chatId);
-        Mockito.doReturn(Optional.empty()).when(commandHandler).handle(update);
+        Mockito.doReturn("aboba").when(message).text();
         assertEquals("Please, pass the registration with /start command", responseService.getAnswer(update));
     }
 
-    @Test
-    public void testCommandReceived() {
-        Mockito.doReturn(Optional.empty()).when(userRegistry).getUser(chatId);
-        Mockito.doReturn(Optional.of("Testcase")).when(commandHandler).handle(update);
-        assertEquals("Testcase", responseService.getAnswer(update));
-    }
 }

@@ -1,10 +1,10 @@
 package edu.java.bot.processor;
 
 import edu.java.bot.processor.trackers.URITracker;
-import lombok.Getter;
-import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.net.URISyntaxException;
+import lombok.Getter;
+import org.springframework.stereotype.Component;
 
 @Component
 public class LinkChecker {

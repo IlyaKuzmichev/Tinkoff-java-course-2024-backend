@@ -1,9 +1,10 @@
 package edu.java.bot.database;
 
-import lombok.Getter;
-import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
+
 
 @Getter
 @Setter
@@ -15,6 +16,7 @@ public class User {
     public User(Long id) {
         this.id = id;
     }
+
     public boolean isTracking(String uri) {
         return links.contains(uri);
     }

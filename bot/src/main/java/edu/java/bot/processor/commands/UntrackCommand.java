@@ -3,37 +3,44 @@ package edu.java.bot.processor.commands;
 import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.UserRegistry;
 import edu.java.bot.database.UserState;
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
-public final class UntrackCommand extends Command {
+@Component("/untrack")
+@Qualifier("action_command")
+public final class UntrackCommand implements Command {
+    private static final String NAME = "/untrack";
+    private static final String DESCRIPTION = "Untrack one of your links";
     private static final String NO_REGISTRATION = "You need to be registered for tracking links";
     private static final String EMPTY_LINK_LIST = "You have no tracking links";
     private static final String LINK_INVITATION = "Input link for untracking";
+    UserRegistry userRegistry;
 
     public UntrackCommand(UserRegistry userRegistry) {
-        super(userRegistry);
+        this.userRegistry = userRegistry;
     }
 
     @Override
-    public String command() {
-        return "/untrack";
+    public String commandName() {
+        return NAME;
     }
 
     @Override
-    public String description() {
-        return "Untrack one of your links";
+    public String commandDescription() {
+        return DESCRIPTION;
     }
 
     @Override
-    protected Optional<String> execute(Update update) {
-        var userId = update.message().chat().id();
-        if (userRegistry.getUser(userId).isEmpty()) {
-            return Optional.of(NO_REGISTRATION);
+    public String execute(Update update) {
+        var user = userRegistry.getUser(update.message().chat().id());
+        if (user.isEmpty()) {
+            return NO_REGISTRATION;
         }
-        if (userRegistry.getUser(userId).get().getLinks().isEmpty()) {
-            return Optional.of(EMPTY_LINK_LIST);
+        if (user.get().getLinks().isEmpty()) {
+            return EMPTY_LINK_LIST;
         }
-        userRegistry.getUser(userId).get().setState(UserState.WAIT_UNTRACK_URI);
-        return Optional.of(LINK_INVITATION);
+        user.get().setState(UserState.WAIT_UNTRACK_URI);
+        return LINK_INVITATION;
     }
 }
+

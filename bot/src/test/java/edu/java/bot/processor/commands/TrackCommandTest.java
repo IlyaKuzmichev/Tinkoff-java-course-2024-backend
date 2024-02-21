@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TrackCommandTest extends CommandTest {
@@ -16,23 +17,18 @@ public class TrackCommandTest extends CommandTest {
         track = new TrackCommand(userRegistry);
     }
 
-    @BeforeEach
-    public void mocMessageText() {
-        Mockito.doReturn("/track").when(message).text();
-    }
-
     @Test
     public void testTryTrackWithRegistration() {
         userRegistry.putUser(new User(chatId));
-        var returnMessage = track.handle(update);
-        assertTrue(returnMessage.isPresent());
-        assertEquals(returnMessage.get(), "Input the link for tracking");
+        var returnMessage = track.execute(update);
+        assertFalse(returnMessage.isEmpty());
+        assertEquals(returnMessage, "Input the link for tracking");
     }
 
     @Test
     public void testTryTrackWithoutRegistration() {
-        var returnMessage = track.handle(update);
-        assertTrue(returnMessage.isPresent());
-        assertEquals(returnMessage.get(), "You need to be registered for tracking links");
+        var returnMessage = track.execute(update);
+        assertFalse(returnMessage.isEmpty());
+        assertEquals(returnMessage, "You need to be registered for tracking links");
     }
 }

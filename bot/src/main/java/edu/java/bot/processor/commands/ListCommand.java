@@ -2,39 +2,43 @@ package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.UserRegistry;
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
-public final class ListCommand extends Command {
-    private static final String COMMAND = "/list";
+@Component("/list")
+@Qualifier("action_command")
+public final class ListCommand implements Command {
+    private static final String NAME = "/list";
     private static final String DESCRIPTION = "Shows list of tracking links";
     private static final String NO_REGISTRATION = "Need to be registered for tracking links";
     private static final String NO_LINKS = "You have no links for tracking";
     private static final String FIRST_LINE = "Your tracking links:\n";
     private static final String FORMATTED_STRING = "%d. %s\n";
+    UserRegistry userRegistry;
 
     public ListCommand(UserRegistry userRegistry) {
-        super(userRegistry);
+        this.userRegistry = userRegistry;
     }
 
     @Override
-    public String command() {
-        return COMMAND;
+    public String commandName() {
+        return NAME;
     }
 
     @Override
-    public String description() {
+    public String commandDescription() {
         return DESCRIPTION;
     }
 
     @Override
-    protected Optional<String> execute(Update update) {
+    public String execute(Update update) {
         StringBuilder builder = new StringBuilder();
         var user = userRegistry.getUser(update.message().chat().id());
         if (user.isEmpty()) {
-            return Optional.of(NO_REGISTRATION);
+            return NO_REGISTRATION;
         }
         if (user.get().getLinks().isEmpty()) {
-            return Optional.of(NO_LINKS);
+            return NO_LINKS;
         }
         builder.append(FIRST_LINE);
         int counter = 1;
@@ -42,6 +46,6 @@ public final class ListCommand extends Command {
             builder.append(FORMATTED_STRING.formatted(counter++, link));
         }
 
-        return Optional.of(builder.toString());
+        return builder.toString();
     }
 }
