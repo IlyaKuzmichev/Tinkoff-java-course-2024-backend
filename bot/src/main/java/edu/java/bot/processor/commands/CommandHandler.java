@@ -2,12 +2,13 @@ package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.UserRegistry;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Optional;
 
-@Component
+@Getter @Component
 public class CommandHandler {
     private final ArrayList<Command> commandList;
 
@@ -25,12 +26,8 @@ public class CommandHandler {
         }
     }
 
-    public ArrayList<Command> getCommandList() {
-        return commandList;
-    }
-
     public Optional<String> handle(Update update) {
-        return commandList.get(0).handle(update);
+        return commandList.getFirst().handle(update);
     }
 
 }

@@ -10,7 +10,7 @@ import java.util.Set;
 
 @Repository
 public class UserRegistry {
-    private final Map<Long, User> users = new HashMap<>();;
+    private final Map<Long, User> users = new HashMap<>();
     @Getter private final Map<String, HashSet<String>> domainLinks = new HashMap<>();
     private final Map<String, Set<User>> usersTrackedLinks = new HashMap<>();
 
