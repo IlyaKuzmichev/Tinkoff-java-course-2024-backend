@@ -15,13 +15,13 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
 @SpringBootTest
-@TestPropertySource(properties = {"github.base-url=http://localhost:8089"})
+@TestPropertySource(locations = "classpath:test")
 public class GitHubClientTest {
 
     private static WireMockServer wireMockServer;
 
     @Autowired
-    private WebClientGitHubClient gitHubClient;
+    private WebGitHubClient gitHubClient;
 
     @BeforeAll
     public static void setup() {

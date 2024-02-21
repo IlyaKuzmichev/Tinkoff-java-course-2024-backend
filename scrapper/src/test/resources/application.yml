@@ -6,9 +6,9 @@ app:
 
 client:
   github:
-    base-url: https://api.github.com
+    base-url: http://localhost:8089
   stackoverflow:
-    base-url: https://api.stackexchange.com/2.3
+    base-url: http://localhost:8089
 
 spring:
   application:

@@ -1,6 +1,6 @@
 package edu.java.client;
 
-import edu.java.model.StackOverflowQuestionResponse;
+import edu.java.model.GitHubRepositoryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -8,21 +8,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Component
-public class WebClientStackOverflowClient implements StackOverflowClient {
-
+public class WebGitHubClient implements GitHubClient {
     private final WebClient webClient;
 
     @Autowired
-    public WebClientStackOverflowClient(WebClient.Builder webClientBuilder,
-        @Value("${stackoverflow.base-url:https://api.stackexchange.com/2.3}") String baseUrl) {
+    public WebGitHubClient(WebClient.Builder webClientBuilder,
+        @Value("${client.github.base-url:https://api.github.com}") String baseUrl) {
         this.webClient = webClientBuilder.baseUrl(baseUrl).build();
     }
 
     @Override
-    public Mono<StackOverflowQuestionResponse> fetchQuestion(int questionId) {
+    public Mono<GitHubRepositoryResponse> fetchRepository(String ownerName, String repositoryName) {
         return webClient.get()
-            .uri("/questions/{questionId}", questionId)
+            .uri("/repos/{ownerName}/{repositoryName}", ownerName, repositoryName)
             .retrieve()
-            .bodyToMono(StackOverflowQuestionResponse.class);
+            .bodyToMono(GitHubRepositoryResponse.class);
     }
 }
