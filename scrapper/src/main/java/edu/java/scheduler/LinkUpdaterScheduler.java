@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public final class LinkUpdaterScheduler {
     static int counter = 1;
+
     @Scheduled(fixedDelayString = "#{@scheduler.interval().toMillis()}")
     public void update() {
         log.info("Scheduled method update number: " + counter);
