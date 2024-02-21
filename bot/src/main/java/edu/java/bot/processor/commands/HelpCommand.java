@@ -13,7 +13,7 @@ public final class HelpCommand implements Command {
     private static final String FORMATTED_STRING = "%s - %s\n";
     private final List<Command> commandList;
 
-    public HelpCommand(@Qualifier("action_command") List<Command> commandList) {
+    public HelpCommand(@Qualifier("command_list_add") List<Command> commandList) {
         this.commandList = commandList;
     }
 

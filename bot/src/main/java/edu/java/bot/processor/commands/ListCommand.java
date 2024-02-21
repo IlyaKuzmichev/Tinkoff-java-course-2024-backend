@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("/list")
-@Qualifier("action_command")
+@Qualifier("command_list_add")
 public final class ListCommand implements Command {
     private static final String NAME = "/list";
     private static final String DESCRIPTION = "Shows list of tracking links";

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("/untrack")
-@Qualifier("action_command")
+@Qualifier("command_list_add")
 public final class UntrackCommand implements Command {
     private static final String NAME = "/untrack";
     private static final String DESCRIPTION = "Untrack one of your links";

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("/track")
-@Qualifier("action_command")
+@Qualifier("command_list_add")
 public final class TrackCommand implements Command {
     private static final String NAME = "/track";
     private static final String DESCRIPTION = "Add new link for tracking";

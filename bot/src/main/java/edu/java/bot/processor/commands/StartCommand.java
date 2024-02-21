@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("/start")
-@Qualifier("action_command")
+@Qualifier("command_list_add")
 public final class StartCommand implements Command {
     private static final String NAME = "/start";
     private static final String DESCRIPTION = "Register new user";
