@@ -2,12 +2,16 @@ package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.database.UserRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Optional;
 
+@Component
 public class CommandHandler {
     private final ArrayList<Command> commandList;
 
+    @Autowired
     public CommandHandler(UserRegistry userRegistry) {
         commandList = new ArrayList<>();
         commandList.add(new StartCommand(userRegistry));

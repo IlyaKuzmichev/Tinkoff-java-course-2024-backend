@@ -7,9 +7,11 @@ import edu.java.bot.database.UserState;
 import edu.java.bot.processor.LinkChecker;
 import edu.java.bot.processor.commands.Command;
 import edu.java.bot.processor.commands.CommandHandler;
+import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Optional;
 
+@Service
 public class ResponseService {
     private static final String NOT_VALID_LINK = "Not valid link";
     private static final String NOT_VALID_RESOURCE = "Not valid resource for tracking";

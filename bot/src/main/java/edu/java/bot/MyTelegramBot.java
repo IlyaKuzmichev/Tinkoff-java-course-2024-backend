@@ -9,11 +9,11 @@ import com.pengrad.telegrambot.request.SetMyCommands;
 import edu.java.bot.service.ResponseService;
 import java.util.List;
 
-public class Bot implements UpdatesListener {
+public class MyTelegramBot implements UpdatesListener {
     private final TelegramBot bot;
     private final ResponseService responseService;
 
-    public Bot(TelegramBot bot, ResponseService responseService) {
+    public MyTelegramBot(TelegramBot bot, ResponseService responseService) {
         this.bot = bot;
         this.responseService = responseService;
     }

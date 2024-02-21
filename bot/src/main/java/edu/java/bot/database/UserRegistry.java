@@ -1,19 +1,20 @@
 package edu.java.bot.database;
 
 import lombok.Getter;
+import org.springframework.stereotype.Repository;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+@Repository
 public class UserRegistry {
-    private final HashMap<Long, User> users;
-    @Getter private final HashMap<String, HashSet<String>> domainLinks;
-    private final HashMap<String, HashSet<User>> usersTrackedLinks;
+    private final Map<Long, User> users = new HashMap<>();;
+    @Getter private final Map<String, HashSet<String>> domainLinks = new HashMap<>();
+    private final Map<String, Set<User>> usersTrackedLinks = new HashMap<>();
 
     public UserRegistry() {
-        users = new HashMap<>();
-        domainLinks = new HashMap<>();
-        usersTrackedLinks = new HashMap<>();
     }
 
     public Optional<User> getUser(Long id) {

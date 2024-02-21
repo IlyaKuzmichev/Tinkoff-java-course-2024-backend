@@ -2,9 +2,11 @@ package edu.java.bot.processor;
 
 import edu.java.bot.processor.trackers.URITracker;
 import lombok.Getter;
+import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+@Component
 public class LinkChecker {
     private static final String INVALID_LINK = "INVALID";
     @Getter private String host;
