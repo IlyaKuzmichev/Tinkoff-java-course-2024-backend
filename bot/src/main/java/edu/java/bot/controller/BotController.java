@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class BotController {
     @PostMapping("/updates")
-    public ResponseEntity<String> processUpdate(@RequestBody LinkUpdateRequest linkUpdateRequest) {
+    public ResponseEntity<Void> processUpdate(@RequestBody LinkUpdateRequest linkUpdateRequest) {
         // Update processing logic
-        return ResponseEntity.ok("Update processed successfully");
+        return ResponseEntity.ok().build();
     }
 }
