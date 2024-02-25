@@ -1,6 +1,7 @@
 package edu.java.client;
 
 import edu.java.model.StackOverflowQuestionResponse;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,10 +20,11 @@ public class WebStackOverflowClient implements StackOverflowClient {
     }
 
     @Override
-    public Mono<StackOverflowQuestionResponse> fetchQuestion(int questionId) {
+    public Mono<Optional<StackOverflowQuestionResponse>> fetchQuestion(int questionId) {
         return webClient.get()
-            .uri("/questions/{questionId}", questionId)
+            .uri("/questions/{questionId}?site=stackoverflow", questionId)
             .retrieve()
-            .bodyToMono(StackOverflowQuestionResponse.class);
+            .bodyToMono(StackOverflowQuestionResponse.StackOverflowQuestionResponseList.class)
+            .map(resp -> Optional.ofNullable(!resp.items().isEmpty() ? resp.items().getFirst() : null));
     }
 }
