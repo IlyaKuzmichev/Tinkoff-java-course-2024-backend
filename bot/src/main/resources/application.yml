@@ -1,6 +1,10 @@
 app:
   telegram-token:
 
+client:
+  scrapper:
+    base-url: http://localhost:8080
+
 spring:
   application:
     name: bot
