@@ -11,13 +11,17 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
 @Configuration
 public class TelegramBotConfig {
     @Bean
     public MyTelegramBot bot(ApplicationConfig applicationConfig, List<Command> commandList,
         ResponseService responseService) {
-        var bot = new MyTelegramBot(new TelegramBot(applicationConfig.telegramToken()), commandList, responseService);
+        String token = System.getenv("TELEGRAM_TOKEN");
+        if (token == null) {
+            token = applicationConfig.telegramToken();
+        }
+
+        var bot = new MyTelegramBot(new TelegramBot(token), commandList, responseService);
         bot.start();
         return bot;
     }
