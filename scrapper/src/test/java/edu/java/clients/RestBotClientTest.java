@@ -18,7 +18,7 @@ import java.util.List;
 @SpringBootTest
 @TestPropertySource(locations = "classpath:test")
 public class RestBotClientTest {
-    private static final String HANDLE = "/updates";
+    private static final String UPDATES_ENDPOINT = "/updates";
     private static final String DESCRIPTION = "Description";
     private static final Long id = 1L;
     private static final List<Long> chatIds = List.of();
@@ -43,7 +43,7 @@ public class RestBotClientTest {
     public void testSendUpdatesCorrectRequest() {
         String url = "https://github.com";
 
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(HANDLE))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UPDATES_ENDPOINT))
             .willReturn(WireMock.aResponse()
                 .withStatus(HttpStatus.SC_OK)
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
@@ -51,13 +51,13 @@ public class RestBotClientTest {
         StepVerifier.create(restBotClient.sendUpdates(id, url, DESCRIPTION, chatIds))
             .verifyComplete();
 
-        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(HANDLE)));
+        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(UPDATES_ENDPOINT)));
     }
 
     @Test
     public void testSendUpdatesClientError() {
         String url = "https://example.com";
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(HANDLE))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UPDATES_ENDPOINT))
             .willReturn(WireMock.aResponse()
                 .withStatus(HttpStatus.SC_NOT_FOUND)
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -69,6 +69,6 @@ public class RestBotClientTest {
                     ((CustomClientException) throwable).getClientErrorResponse().code().equals("404"))
             .verify();
 
-        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(HANDLE)));
+        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(UPDATES_ENDPOINT)));
     }
 }
