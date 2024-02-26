@@ -1,7 +1,8 @@
-package edu.java.client;
+package edu.java.clients;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import edu.java.clients.stackoverflow.WebStackOverflowClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -12,22 +13,21 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.test.StepVerifier;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:test")
-public class GitHubClientTest {
+public class StackOverflowClientTest {
 
     private static WireMockServer wireMockServer;
 
     @Autowired
-    private WebGitHubClient gitHubClient;
+    private WebStackOverflowClient stackOverflowClient;
 
     @BeforeAll
     public static void setup() {
         wireMockServer = new WireMockServer(8089);
         wireMockServer.start();
-        WireMock.configureFor("localhost", wireMockServer.port());
+        WireMock.configureFor("localhost", 8089);
     }
 
     @AfterAll
@@ -36,38 +36,35 @@ public class GitHubClientTest {
     }
 
     @Test
-    public void testFetchRepositoryGitHubClient() {
-        String repositoryName = "testRepo";
-        String ownerName = "testOwner";
-        String responseBody = "{\"name\":\"testRepo\",\"full_name\":\"https://github.com/testOwner/testRepo\"," +
-            "\"html_url\":\"https://github.com/testOwner/testRepo\",\"updated_at\":\"2022-02-01T00:00:00Z\"," +
-            "\"pushed_at\":\"2022-03-01T00:00:00Z\"}";
+    public void testFetchQuestionStackOverflowClient() {
+        int questionId = 12345;
+        String responseBody = "{\"items\": [{\"question_id\": 12345, \"last_activity_date\": 1687479446}]}";
 
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/repos/" + ownerName + "/" + repositoryName))
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/questions/" + questionId))
             .willReturn(WireMock.aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
                 .withBody(responseBody)));
 
-        StepVerifier.create(gitHubClient.fetchRepository(ownerName, repositoryName))
+        StepVerifier.create(stackOverflowClient.fetchQuestion(questionId))
             .expectNextMatches(response -> {
-                OffsetDateTime expectedDate = OffsetDateTime.parse("2022-02-01T00:00:00Z", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                return response.fullName().equals("https://github.com/testOwner/testRepo") &&
-                    response.updatedAt().isEqual(expectedDate);
+                OffsetDateTime expectedDate = OffsetDateTime.parse("2023-06-23T00:17:26Z");
+                return response.items().size() == 1 &&
+                    response.items().getFirst().questionId() == questionId &&
+                    response.items().getFirst().getLastActivityDate().isEqual(expectedDate);
             })
             .verifyComplete();
     }
 
     @Test
-    public void testFetchRepositoryWithBadRequest() {
-        String repositoryName = "invalidRepo";
-        String ownerName = "invalidOwner";
+    public void testFetchQuestionWithBadRequest() {
+        int questionId = -1;
 
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/repos/" + ownerName + "/" + repositoryName))
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/questions/" + questionId))
             .willReturn(WireMock.aResponse()
                 .withStatus(400)));
 
-        StepVerifier.create(gitHubClient.fetchRepository(ownerName, repositoryName))
+        StepVerifier.create(stackOverflowClient.fetchQuestion(questionId))
             .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
                 ((WebClientResponseException) throwable).getStatusCode() == HttpStatus.BAD_REQUEST)
             .verify();

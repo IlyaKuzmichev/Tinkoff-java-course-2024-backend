@@ -1,4 +1,4 @@
-package edu.java.client;
+package edu.java.clients.stackoverflow;
 
 import edu.java.model.StackOverflowQuestionResponse;
 import org.springframework.beans.factory.annotation.Autowired;

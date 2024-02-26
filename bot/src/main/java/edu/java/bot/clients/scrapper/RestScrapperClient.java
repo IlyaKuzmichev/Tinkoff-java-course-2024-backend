@@ -21,8 +21,8 @@ public class RestScrapperClient implements ScrapperClient {
     private final WebClient webClient;
 
     @Autowired
-    public RestScrapperClient(WebClient.Builder builder, @Value("${client.scrapper.base-url:http://localhost:8080}") String baseUrl) {
-        this.webClient = builder.baseUrl(baseUrl).build();
+    public RestScrapperClient(WebClient.Builder webClientBuilder, @Value("${client.scrapper.base-url:http://localhost:8080}") String baseUrl) {
+        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
     }
 
     @Override
