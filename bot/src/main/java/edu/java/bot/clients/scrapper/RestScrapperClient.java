@@ -1,14 +1,16 @@
 package edu.java.bot.clients.scrapper;
 
 import edu.java.bot.clients.scrapper.dto.AddLinkRequest;
+import edu.java.bot.clients.scrapper.dto.ClientErrorResponse;
 import edu.java.bot.clients.scrapper.dto.LinkResponse;
 import edu.java.bot.clients.scrapper.dto.ListLinksResponse;
 import edu.java.bot.clients.scrapper.dto.RemoveLinkRequest;
 import java.net.URI;
+import edu.java.bot.clients.scrapper.exception.CustomClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -31,8 +33,11 @@ public class RestScrapperClient implements ScrapperClient {
             .post()
             .uri(CHAT_ENDPOINT_PREFIX + chatId)
             .retrieve()
-            .toBodilessEntity()
-            .mapNotNull(HttpEntity::getBody);
+            .onStatus(HttpStatusCode::is4xxClientError, response ->
+                response.bodyToMono(ClientErrorResponse.class)
+                    .flatMap(clientErrorResponse ->
+                        Mono.error(new CustomClientException(clientErrorResponse))))
+            .bodyToMono(Void.class);
     }
 
     @Override
@@ -41,8 +46,11 @@ public class RestScrapperClient implements ScrapperClient {
             .delete()
             .uri(CHAT_ENDPOINT_PREFIX + chatId)
             .retrieve()
-            .toBodilessEntity()
-            .mapNotNull(HttpEntity::getBody);
+            .onStatus(HttpStatusCode::is4xxClientError, response ->
+                response.bodyToMono(ClientErrorResponse.class)
+                    .flatMap(clientErrorResponse ->
+                        Mono.error(new CustomClientException(clientErrorResponse))))
+            .bodyToMono(Void.class);
     }
 
     @Override
@@ -52,6 +60,10 @@ public class RestScrapperClient implements ScrapperClient {
             .uri(LINKS_ENDPOINT)
             .header(TG_CHAT_ID_HEADER, chatId.toString())
             .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, response ->
+                response.bodyToMono(ClientErrorResponse.class)
+                    .flatMap(clientErrorResponse ->
+                        Mono.error(new CustomClientException(clientErrorResponse))))
             .bodyToMono(ListLinksResponse.class);
     }
 
@@ -63,6 +75,10 @@ public class RestScrapperClient implements ScrapperClient {
             .header(TG_CHAT_ID_HEADER, chatId.toString())
             .bodyValue(new AddLinkRequest(link.toString()))
             .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, response ->
+                response.bodyToMono(ClientErrorResponse.class)
+                    .flatMap(clientErrorResponse ->
+                        Mono.error(new CustomClientException(clientErrorResponse))))
             .bodyToMono(LinkResponse.class);
     }
 
@@ -74,6 +90,10 @@ public class RestScrapperClient implements ScrapperClient {
             .header(TG_CHAT_ID_HEADER, chatId.toString())
             .body(Mono.just(new RemoveLinkRequest(link.toString())), RemoveLinkRequest.class)
             .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, response ->
+                response.bodyToMono(ClientErrorResponse.class)
+                    .flatMap(clientErrorResponse ->
+                        Mono.error(new CustomClientException(clientErrorResponse))))
             .bodyToMono(LinkResponse.class);
     }
 }
