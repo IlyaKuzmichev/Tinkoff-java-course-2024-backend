@@ -1,4 +1,6 @@
 package edu.java.controller.dto;
 
-public record LinkResponse(Long id, String link) {
+import java.net.URI;
+
+public record LinkResponse(Long id, URI url) {
 }

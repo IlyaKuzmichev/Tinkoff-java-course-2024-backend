@@ -4,6 +4,7 @@ import edu.java.controller.dto.AddLinkRequest;
 import edu.java.controller.dto.LinkResponse;
 import edu.java.controller.dto.ListLinksResponse;
 import edu.java.controller.dto.RemoveLinkRequest;
+import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,22 +22,20 @@ public class LinksController {
     @GetMapping
     public ResponseEntity<ListLinksResponse> getAllLinks(@RequestHeader(name = "Tg-Chat-Id") Long id) {
         // Getting all links by chat id
-        ListLinksResponse links = new ListLinksResponse(List.of(new LinkResponse(id, "aboba.com")), 1);
+        ListLinksResponse links = new ListLinksResponse(List.of(new LinkResponse(id, URI.create("aboba.com"))), 1);
         return ResponseEntity.ok(links);
     }
 
     @PostMapping
     public ResponseEntity<LinkResponse> addLink(@RequestHeader(name = "Tg-Chat-Id") Long id,
         @RequestBody AddLinkRequest addLinkRequest) {
-        // Add link by chat id
-        LinkResponse linkResponse = new LinkResponse(id, addLinkRequest.link());
+        LinkResponse linkResponse = new LinkResponse(id, URI.create(addLinkRequest.link()));
         return ResponseEntity.ok(linkResponse);
     }
 
     @DeleteMapping
     public ResponseEntity<LinkResponse> removeLink(@RequestHeader(name = "Tg-Chat-Id") Long id,
         @RequestBody RemoveLinkRequest removeLinkRequest) {
-        // Remove link by chat id
         LinkResponse linkResponse = new LinkResponse(id, removeLinkRequest.link());
         return ResponseEntity.ok(linkResponse);
     }
