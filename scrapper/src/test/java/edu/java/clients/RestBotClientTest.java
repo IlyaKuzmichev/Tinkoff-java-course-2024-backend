@@ -18,10 +18,10 @@ import java.util.List;
 @SpringBootTest
 @TestPropertySource(locations = "classpath:test")
 public class RestBotClientTest {
-    private final String HANDLE = "/updates";
-    private final String DESCRIPTION = "Description";
-    private final Long id = 1L;
-    private final List<Long> chatIds = List.of();
+    private static final String HANDLE = "/updates";
+    private static final String DESCRIPTION = "Description";
+    private static final Long id = 1L;
+    private static final List<Long> chatIds = List.of();
 
     private static WireMockServer wireMockServer;
     @Autowired
@@ -61,11 +61,11 @@ public class RestBotClientTest {
             .willReturn(WireMock.aResponse()
                 .withStatus(HttpStatus.SC_NOT_FOUND)
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .withBody("{\"description\": \"Chat id for user not found\", \"code\": \"404\"}")));
+                .withBody("{\"description\": \"Not Found\", \"code\": \"404\"}")));
 
         StepVerifier.create(restBotClient.sendUpdates(id, url, DESCRIPTION, chatIds))
             .expectErrorMatches(throwable -> throwable instanceof CustomClientException &&
-                    ((CustomClientException) throwable).getClientErrorResponse().description().equals("Chat id for user not found") &&
+                    ((CustomClientException) throwable).getClientErrorResponse().description().equals("Not Found") &&
                     ((CustomClientException) throwable).getClientErrorResponse().code().equals("404"))
             .verify();
 
