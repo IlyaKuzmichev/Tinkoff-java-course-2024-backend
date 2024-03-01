@@ -1,6 +1,6 @@
-package edu.java.client;
+package edu.java.clients.github;
 
-import edu.java.model.GitHubRepositoryResponse;
+import edu.java.clients.github.dto.GitHubRepositoryResponse;
 import reactor.core.publisher.Mono;
 
 public interface GitHubClient {

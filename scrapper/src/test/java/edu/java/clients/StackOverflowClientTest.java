@@ -1,7 +1,8 @@
-package edu.java.client;
+package edu.java.clients;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import edu.java.clients.stackoverflow.StackOverflowClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ public class StackOverflowClientTest {
     private static WireMockServer wireMockServer;
 
     @Autowired
-    private WebStackOverflowClient stackOverflowClient;
+    private StackOverflowClient stackOverflowClient;
 
     @BeforeAll
     public static void setup() {

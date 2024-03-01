@@ -1,6 +1,7 @@
-package edu.java.client;
+package edu.java.clients;
 
 
+import edu.java.clients.github.GitHubClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;

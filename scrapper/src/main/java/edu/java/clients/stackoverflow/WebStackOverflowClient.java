@@ -1,6 +1,6 @@
-package edu.java.client;
+package edu.java.clients.stackoverflow;
 
-import edu.java.model.StackOverflowQuestionResponse;
+import edu.java.clients.stackoverflow.dto.StackOverflowQuestionResponse;
 import java.util.Optional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
