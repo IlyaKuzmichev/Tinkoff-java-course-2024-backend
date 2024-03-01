@@ -2,7 +2,7 @@ package edu.java.clients;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import edu.java.clients.github.WebGitHubClient;
+import edu.java.clients.github.GitHubClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ public class GitHubClientTest {
     private static WireMockServer wireMockServer;
 
     @Autowired
-    private WebGitHubClient gitHubClient;
+    private GitHubClient gitHubClient;
 
     @BeforeAll
     public static void setup() {

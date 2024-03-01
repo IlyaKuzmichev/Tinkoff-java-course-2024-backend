@@ -1,8 +1,9 @@
 package edu.java.clients.stackoverflow;
 
-import edu.java.model.StackOverflowQuestionResponse;
+import edu.java.clients.stackoverflow.dto.StackOverflowQuestionResponse;
+import java.util.Optional;
 import reactor.core.publisher.Mono;
 
 public interface StackOverflowClient {
-    Mono<StackOverflowQuestionResponse> fetchQuestion(int questionId);
+    Mono<Optional<StackOverflowQuestionResponse>> fetchQuestion(int questionId);
 }

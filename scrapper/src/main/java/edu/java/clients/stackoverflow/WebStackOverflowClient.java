@@ -1,28 +1,24 @@
 package edu.java.clients.stackoverflow;
 
-import edu.java.model.StackOverflowQuestionResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import edu.java.clients.stackoverflow.dto.StackOverflowQuestionResponse;
+import java.util.Optional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-@Component
 public class WebStackOverflowClient implements StackOverflowClient {
 
     private final WebClient webClient;
 
-    @Autowired
-    public WebStackOverflowClient(WebClient.Builder webClientBuilder,
-        @Value("${client.stackoverflow.base-url:https://api.stackexchange.com/2.3}") String baseUrl) {
-        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
+    public WebStackOverflowClient(WebClient webClient) {
+        this.webClient = webClient;
     }
 
     @Override
-    public Mono<StackOverflowQuestionResponse> fetchQuestion(int questionId) {
+    public Mono<Optional<StackOverflowQuestionResponse>> fetchQuestion(int questionId) {
         return webClient.get()
-            .uri("/questions/{questionId}", questionId)
+            .uri("/questions/{questionId}?site=stackoverflow", questionId)
             .retrieve()
-            .bodyToMono(StackOverflowQuestionResponse.class);
+            .bodyToMono(StackOverflowQuestionResponse.StackOverflowQuestionResponseList.class)
+            .map(resp -> Optional.ofNullable(!resp.items().isEmpty() ? resp.items().getFirst() : null));
     }
 }

@@ -2,7 +2,7 @@ package edu.java.clients;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import edu.java.clients.stackoverflow.WebStackOverflowClient;
+import edu.java.clients.stackoverflow.StackOverflowClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ public class StackOverflowClientTest {
     private static WireMockServer wireMockServer;
 
     @Autowired
-    private WebStackOverflowClient stackOverflowClient;
+    private StackOverflowClient stackOverflowClient;
 
     @BeforeAll
     public static void setup() {
@@ -40,7 +40,7 @@ public class StackOverflowClientTest {
         int questionId = 12345;
         String responseBody = "{\"items\": [{\"question_id\": 12345, \"last_activity_date\": 1687479446}]}";
 
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/questions/" + questionId))
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/questions/" + questionId + "?site=stackoverflow"))
             .willReturn(WireMock.aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
@@ -49,9 +49,8 @@ public class StackOverflowClientTest {
         StepVerifier.create(stackOverflowClient.fetchQuestion(questionId))
             .expectNextMatches(response -> {
                 OffsetDateTime expectedDate = OffsetDateTime.parse("2023-06-23T00:17:26Z");
-                return response.items().size() == 1 &&
-                    response.items().getFirst().questionId() == questionId &&
-                    response.items().getFirst().getLastActivityDate().isEqual(expectedDate);
+                return response.isPresent() && response.get().questionId() == questionId &&
+                    response.get().getLastActivityDate().isEqual(expectedDate);
             })
             .verifyComplete();
     }
@@ -60,7 +59,7 @@ public class StackOverflowClientTest {
     public void testFetchQuestionWithBadRequest() {
         int questionId = -1;
 
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/questions/" + questionId))
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/questions/" + questionId + "?site=stackoverflow"))
             .willReturn(WireMock.aResponse()
                 .withStatus(400)));
 

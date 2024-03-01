@@ -1,4 +1,4 @@
-package edu.java.model;
+package edu.java.clients.github.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
