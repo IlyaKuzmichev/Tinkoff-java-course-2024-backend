@@ -18,18 +18,37 @@ public class SimpleIntegrationTest extends  IntegrationEnvironment {
     }
 
     @Test
-    public void testExistingTablesInsideContainer() {
+    public void testCheckExistingTablesInsideContainer() {
         try (
             Connection connection = DriverManager.getConnection(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
             Statement statement = connection.createStatement()) {
 
-            ResultSet resultSetUsers = statement.executeQuery("SELECT to_regclass('public.users')");
-            assertTrue(resultSetUsers.next(), "Table 'users' does not exist");
+            ResultSet resultSetUsers = statement.executeQuery("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users')");
+            resultSetUsers.next();
+            assertTrue(resultSetUsers.getBoolean(1), "Table 'users' does not exist");
 
-            ResultSet resultSetAllLinks = statement.executeQuery("SELECT to_regclass('public.all_links')");
-            assertTrue(resultSetAllLinks.next(), "Table 'all_links' does not exist");
-        } catch (SQLException throwables) {
-            throw new RuntimeException("Error while checking tables existence", throwables);
+            ResultSet resultSetAllLinks = statement.executeQuery("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'all_links')");
+            resultSetAllLinks.next();
+            assertTrue(resultSetAllLinks.getBoolean(1), "Table 'all_links' does not exist");
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error while checking tables existence", e);
+        }
+    }
+
+    @Test
+    public void testExistingDataInTableInsideContainer() {
+        try (
+            Connection connection = DriverManager.getConnection(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+            Statement statement = connection.createStatement()) {
+
+            ResultSet resultSetUsersQuantity = statement.executeQuery("SELECT COUNT(*) AS quantity FROM users");
+            resultSetUsersQuantity.next();
+            assertTrue(resultSetUsersQuantity.getInt("quantity") == 3, "Error occured");
+
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error while checking tables existence", e);
         }
     }
 }

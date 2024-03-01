@@ -38,3 +38,7 @@ CREATE TABLE IF NOT EXISTS user_tracked_links
     link_id BIGINT REFERENCES all_links(link_id),
     PRIMARY KEY (user_id, link_id)
 );
+
+--changeset wilmerno:for_testing
+INSERT INTO users(chat_id)
+VALUES (123), (456), (789);
