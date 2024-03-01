@@ -15,6 +15,10 @@ client:
 spring:
   application:
     name: scrapper
+  datasource:
+    url: jdbc:postgresql://localhost:5432/scrapper
+    username: postgres
+    password: postgres
 
 springdoc:
   swagger-ui:
