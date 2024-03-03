@@ -17,7 +17,8 @@ public class ClientConfig {
     }
 
     @Bean
-    public StackOverflowClient stackOverflowClient(@Qualifier("stackoverflow_web_client") WebClient stackOverflowWebClient) {
+    public StackOverflowClient stackOverflowClient(
+        @Qualifier("stackoverflow_web_client") WebClient stackOverflowWebClient) {
         return new WebStackOverflowClient(stackOverflowWebClient);
     }
 }
