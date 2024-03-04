@@ -5,6 +5,8 @@ import java.net.URI;
 
 public interface LinkRepository {
     void addLink(Long chatId, URI url);
+
     void removeLink(Long chatId, URI url);
+
     ListLinksResponse findAllLinks();
 }
