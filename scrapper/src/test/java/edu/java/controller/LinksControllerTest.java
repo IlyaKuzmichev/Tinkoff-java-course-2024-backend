@@ -43,7 +43,7 @@ public class LinksControllerTest {
     }
 
     @Test
-    public void testRemoveLink_Success() throws Exception {
+    public void testRemoveLinkSuccess() throws Exception {
         String requestBody = "{\"link\": \"example.com\"}";
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/links")

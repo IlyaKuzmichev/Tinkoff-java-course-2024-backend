@@ -73,7 +73,7 @@ public class RestScrapperClient implements ScrapperClient {
             .post()
             .uri(LINKS_ENDPOINT)
             .header(TG_CHAT_ID_HEADER, chatId.toString())
-            .bodyValue(new AddLinkRequest(link.toString()))
+            .bodyValue(new AddLinkRequest(link))
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response ->
                 response.bodyToMono(ClientErrorResponse.class)
@@ -88,7 +88,7 @@ public class RestScrapperClient implements ScrapperClient {
             .method(HttpMethod.DELETE)
             .uri(LINKS_ENDPOINT)
             .header(TG_CHAT_ID_HEADER, chatId.toString())
-            .body(Mono.just(new RemoveLinkRequest(link.toString())), RemoveLinkRequest.class)
+            .body(Mono.just(new RemoveLinkRequest(link)), RemoveLinkRequest.class)
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response ->
                 response.bodyToMono(ClientErrorResponse.class)

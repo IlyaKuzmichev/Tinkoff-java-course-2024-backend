@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import reactor.test.StepVerifier;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @SpringBootTest
@@ -40,8 +42,8 @@ public class RestBotClientTest {
     }
 
     @Test
-    public void testSendUpdatesCorrectRequest() {
-        String url = "https://github.com";
+    public void testSendUpdatesCorrectRequest() throws URISyntaxException {
+        URI url = new URI("https://github.com");
 
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UPDATES_ENDPOINT))
             .willReturn(WireMock.aResponse()
@@ -55,8 +57,8 @@ public class RestBotClientTest {
     }
 
     @Test
-    public void testSendUpdatesClientError() {
-        String url = "https://example.com";
+    public void testSendUpdatesClientError() throws URISyntaxException {
+        URI url = new URI("https://example.com");
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UPDATES_ENDPOINT))
             .willReturn(WireMock.aResponse()
                 .withStatus(HttpStatus.SC_NOT_FOUND)
