@@ -7,7 +7,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import static org.hibernate.validator.internal.util.Contracts.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class SimpleIntegrationTest extends  IntegrationEnvironment {
@@ -44,7 +46,7 @@ public class SimpleIntegrationTest extends  IntegrationEnvironment {
 
             ResultSet resultSetUsersQuantity = statement.executeQuery("SELECT COUNT(*) AS quantity FROM users");
             resultSetUsersQuantity.next();
-            assertTrue(resultSetUsersQuantity.getInt("quantity") == 3, "Error occured");
+            assertEquals(3, resultSetUsersQuantity.getInt("quantity"), "Error occured");
 
 
         } catch (SQLException e) {
