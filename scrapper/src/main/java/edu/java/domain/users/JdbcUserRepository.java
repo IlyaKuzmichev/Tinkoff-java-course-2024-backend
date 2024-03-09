@@ -1,17 +1,24 @@
 package edu.java.domain.users;
 
-import edu.java.controller.exception.AttemptDoubleRegistrationException;
-import edu.java.controller.exception.ChatIdNotFoundException;
+import edu.java.domain.mappers.UserStatusMapper;
+import edu.java.exception.AttemptDoubleRegistrationException;
+import edu.java.exception.UserIdNotFoundException;
+import edu.java.models.User;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public class JdbcUserRepository implements UserRepository {
-    private static final String EXCEPTION_PREFIX = "User with chat ID ";
+public class JdbcUserRepository {
+    private static final String USER_EXCEPTION_FORMAT = "User with ID %d %s";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -19,31 +26,63 @@ public class JdbcUserRepository implements UserRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Override
     @Transactional
-    public void addUser(Long chatId) {
-        String sql = "INSERT INTO users(chat_id) VALUES (?)";
+    public void addUser(User user) {
+        String sql = "INSERT INTO users(user_id) VALUES (?)";
         try {
-            jdbcTemplate.update(sql, chatId);
+            jdbcTemplate.update(sql, user.getUserId());
         } catch (DataIntegrityViolationException e) {
-            throw new AttemptDoubleRegistrationException(EXCEPTION_PREFIX + chatId + " already exists.");
+            throw new AttemptDoubleRegistrationException(
+                USER_EXCEPTION_FORMAT.formatted(user.getUserId(), "already exists")
+            );
         }
     }
 
-    @Override
+    public void updateUser(User user) {
+        String sql = "UPDATE users SET user_status = ?::user_status_enum WHERE user_id = ?";
+        int affected = jdbcTemplate.update(
+            sql,
+            UserStatusMapper.userStatusToString(user.getStatus()),
+            user.getUserId()
+        );
+        if (affected == 0) {
+            throw new UserIdNotFoundException(user.getUserId());
+        }
+    }
+
     @Transactional
-    public void removeUser(Long chatId) {
+    public void removeUser(Long userId) {
         String sql = "DELETE FROM users WHERE user_id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, chatId);
+        int rowsAffected = jdbcTemplate.update(sql, userId);
         if (rowsAffected == 0) {
-            throw new ChatIdNotFoundException(EXCEPTION_PREFIX + chatId + "not found");
+            throw new UserIdNotFoundException(userId);
         }
     }
 
-    @Override
+    public Optional<User> findUser(Long userId) {
+        String sql = "SELECT user_id, user_status FROM users WHERE user_id = ?";
+        Optional<User> user;
+        try {
+            user = Optional.ofNullable(jdbcTemplate.queryForObject(sql, new UserMapper(), userId));
+        } catch (IncorrectResultSizeDataAccessException e) {
+            user = Optional.empty();
+        }
+        return user;
+    }
+
     @Transactional(readOnly = true)
-    public List<Long> findAllUsers() {
-        String sql = "SELECT chat_id FROM users";
-        return jdbcTemplate.query(sql, (resultSet, rowNum) -> resultSet.getLong("chat_id"));
+    public List<User> findAllUsers() {
+        String sql = "SELECT user_id, user_status FROM users";
+        return jdbcTemplate.query(sql, new UserMapper());
+    }
+
+    private static class UserMapper implements RowMapper<User> {
+
+        @Override
+        public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+            Long userId = resultSet.getLong("user_id");
+            User.Status status = UserStatusMapper.userStatusFromString(resultSet.getString("user_status"));
+            return new User(userId, status);
+        }
     }
 }

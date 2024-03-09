@@ -1,4 +1,4 @@
-package edu.java.controller.exception;
+package edu.java.exception;
 
 public class IncorrectRequestParametersException extends RuntimeException {
     public IncorrectRequestParametersException(String errorMessage) {

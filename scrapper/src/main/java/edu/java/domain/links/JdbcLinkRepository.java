@@ -1,11 +1,8 @@
 package edu.java.domain.links;
 
-import edu.java.controller.dto.LinkResponse;
-import edu.java.controller.dto.ListLinksResponse;
-import edu.java.controller.exception.AttemptAddLinkOneMoreTimeException;
-import edu.java.controller.exception.ChatIdNotFoundException;
-import edu.java.controller.exception.IncorrectRequestParametersException;
-import edu.java.controller.exception.LinkNotFoundException;
+import edu.java.exception.AttemptAddLinkOneMoreTimeException;
+import edu.java.exception.IncorrectRequestParametersException;
+import edu.java.models.Link;
 import java.net.URI;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +12,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public class JdbcLinkRepository implements LinkRepository {
-    private static final String USER_NOT_REGISTERED = "User with chat ID %d not registered";
-    private static final String SELECT_LINK_ID = "SELECT link_id FROM all_links WHERE url = ?";
+public class JdbcLinkRepository {
+    private static final String SELECT_LINK_ID = "SELECT link_id FROM links WHERE url = ?";
     private static final String GITHUB = "github";
     private static final String STACK_OVERFLOW = "stackoverflow";
     private final JdbcTemplate jdbcTemplate;
@@ -27,78 +23,64 @@ public class JdbcLinkRepository implements LinkRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Override
     @Transactional
-    public void addLink(Long chatId, URI url) {
-        Long userId = getUserId(chatId);
-        if (userId == null) {
-            throw new ChatIdNotFoundException(USER_NOT_REGISTERED.formatted(chatId));
-        }
-
-        Long linkId = getLinkIdByUrl(url.toString());
-        String linkType = parseLinkType(url);
-        if (linkType == null) {
-            throw new IncorrectRequestParametersException("Invalid link for scrapper tracking");
-        }
-
-        if (linkId == null) {
-            linkId = addLinkToAllLinks(url.toString(), linkType);
-
-            if (linkType.equals(GITHUB)) {
-                addGithubLink(linkId);
-            } else if (linkType.equals(STACK_OVERFLOW)) {
-                addStackOverflowLink(linkId);
-            }
-        }
+    public void addLink(Long userId, Link link) {
+        Long linkId = insertLinkIntoTables(link.getUrl());
 
         if (isLinkNotTrackedByUser(userId, linkId)) {
             addUserTrackedLink(userId, linkId);
         } else {
             throw new AttemptAddLinkOneMoreTimeException(
-                "User with chat ID " + chatId + "already tracking link " + url);
+                "User with ID " + userId + "already tracking link " + link.getUrl());
         }
+        link.setId(linkId);
     }
 
-    @Override
-    @Transactional
-    public void removeLink(Long chatId, URI url) {
-        Long userId = getUserId(chatId);
-        if (userId == null) {
-            throw new ChatIdNotFoundException(USER_NOT_REGISTERED.formatted(chatId));
+    private Long insertLinkIntoTables(URI url) {
+        String linkType = parseLinkType(url);
+        if (linkType == null) {
+            throw new IncorrectRequestParametersException("Invalid link for scrapper tracking");
         }
+        Long linkId;
+
+        linkId = jdbcTemplate.queryForObject(
+            "INSERT INTO links(url, link_type) VALUES (?, ?::link_type_enum) "
+                + "ON CONFLICT (url) DO UPDATE SET link_type = EXCLUDED.link_type RETURNING link_id",
+            Long.class,
+            url.toString(),
+            linkType
+        );
+
+        if (linkType.equals(GITHUB)) {
+            addGithubLink(linkId);
+        } else if (linkType.equals(STACK_OVERFLOW)) {
+            addStackOverflowLink(linkId);
+        }
+
+        return linkId;
+    }
+
+
+    @Transactional
+    public Link removeLinkByURL(Long userId, URI url) {
 
         Long linkId = getLinkIdByUrl(url.toString());
-        if (linkId == null || isLinkNotTrackedByUser(userId, linkId)) {
-            throw new LinkNotFoundException("Link with URL " + url + "isn't tracking by user with chat ID " + chatId);
-        }
-
         removeUserTrackedLink(userId, linkId);
         if (!isLinkTracked(linkId)) {
             removeLinkById(linkId);
         }
+        return new Link(linkId, url);
     }
 
-    @Override
+
     @Transactional
-    public ListLinksResponse findAllLinks() {
-        String sql = "SELECT link_id, url FROM all_links";
-        List<LinkResponse> linkResponses = jdbcTemplate.query(sql, (rs, rowNum) -> {
+    public List<Link> findAllLinks() {
+        String sql = "SELECT link_id, url FROM links";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
             long id = rs.getLong("link_id");
-            String url = rs.getString("url");
-            return new LinkResponse(id, URI.create(url));
+            URI url = URI.create(rs.getString("url"));
+            return new Link(id, url);
         });
-
-        int size = linkResponses.size();
-        return new ListLinksResponse(linkResponses, size);
-    }
-
-    private Long getUserId(long chatId) {
-        String sql = "SELECT user_id FROM users WHERE chat_id = ?";
-        try {
-            return jdbcTemplate.queryForObject(sql, Long.class, chatId);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
     }
 
     private Long getLinkIdByUrl(String url) {
@@ -109,19 +91,13 @@ public class JdbcLinkRepository implements LinkRepository {
         }
     }
 
-    private Long addLinkToAllLinks(String url, String linkType) {
-        String sql = "INSERT INTO all_links (url, link_type) VALUES (?, ?)";
-        jdbcTemplate.update(sql, url, linkType);
-        return jdbcTemplate.queryForObject(SELECT_LINK_ID, Long.class, url);
-    }
-
     private void addGithubLink(long linkId) {
-        String sql = "INSERT INTO github_links (link_id) VALUES (?)";
+        String sql = "INSERT INTO github_links (link_id) VALUES (?) ON CONFLICT DO NOTHING";
         jdbcTemplate.update(sql, linkId);
     }
 
     private void addStackOverflowLink(long linkId) {
-        String sql = "INSERT INTO stackoverflow_links (link_id) VALUES (?)";
+        String sql = "INSERT INTO stackoverflow_links (link_id) VALUES (?) ON CONFLICT DO NOTHING";
         jdbcTemplate.update(sql, linkId);
     }
 
@@ -154,11 +130,11 @@ public class JdbcLinkRepository implements LinkRepository {
         String deleteStackOverflowLinkSql = "DELETE FROM stackoverflow_links WHERE link_id = ?";
         jdbcTemplate.update(deleteStackOverflowLinkSql, linkId);
 
-        String deleteAllLinksSql = "DELETE FROM all_links WHERE link_id = ?";
+        String deleteAllLinksSql = "DELETE FROM links WHERE link_id = ?";
         jdbcTemplate.update(deleteAllLinksSql, linkId);
     }
 
-    private String parseLinkType(URI url) {
+    private static String parseLinkType(URI url) {
         String link = url.toString();
 
         if (link.contains("https://github.com/")) {

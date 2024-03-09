@@ -1,6 +1,11 @@
-package edu.java.controller.exception;
+package edu.java.controller;
 
 import edu.java.controller.dto.ApiErrorResponse;
+import edu.java.exception.AttemptAddLinkOneMoreTimeException;
+import edu.java.exception.AttemptDoubleRegistrationException;
+import edu.java.exception.IncorrectRequestParametersException;
+import edu.java.exception.LinkNotFoundException;
+import edu.java.exception.UserIdNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,7 +25,7 @@ public class ControllerExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    @ExceptionHandler(ChatIdNotFoundException.class)
+    @ExceptionHandler(UserIdNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleChatIdNotFoundException(Exception ex) {
         ApiErrorResponse errorResponse = new ApiErrorResponse(
             "Chat id for user not found",

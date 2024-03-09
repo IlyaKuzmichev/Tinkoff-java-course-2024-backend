@@ -1,4 +1,4 @@
-package edu.java.controller.exception;
+package edu.java.exception;
 
 public class AttemptDoubleRegistrationException extends RuntimeException {
     public AttemptDoubleRegistrationException(String message) {

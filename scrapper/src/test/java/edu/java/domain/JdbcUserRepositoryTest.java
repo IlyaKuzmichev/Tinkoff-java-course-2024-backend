@@ -1,8 +1,9 @@
 package edu.java.domain;
 
-import edu.java.controller.exception.AttemptDoubleRegistrationException;
-import edu.java.controller.exception.ChatIdNotFoundException;
-import edu.java.domain.users.UserRepository;
+import edu.java.exception.AttemptDoubleRegistrationException;
+import edu.java.domain.users.JdbcUserRepository;
+import edu.java.exception.UserIdNotFoundException;
+import edu.java.models.User;
 import edu.java.scrapper.IntegrationEnvironment;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,27 +19,29 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class JdbcUserRepositoryTest extends IntegrationEnvironment {
 
     @Autowired
-    private UserRepository userRepository;
+    private JdbcUserRepository userRepository;
 
     @Test
     @Transactional
     @Rollback
     void addUserTest() {
-        userRepository.addUser(123456789L);
+        User user = new User(123456789L, User.Status.BASE);
+        userRepository.addUser(user);
 
-        List<Long> users = userRepository.findAllUsers();
+        List<User> users = userRepository.findAllUsers();
         assertEquals(1, users.size());
-        assertEquals(Long.valueOf(123456789L), users.getFirst());
+        assertEquals(user, users.getFirst());
     }
 
     @Test
     @Transactional
     @Rollback
     public void removeUserTest() {
-        userRepository.addUser(987654321L);
-        userRepository.removeUser(987654321L);
+        User user = new User(13L, User.Status.BASE);
+        userRepository.addUser(user);
+        userRepository.removeUser(user.getUserId());
 
-        List<Long> users = userRepository.findAllUsers();
+        List<User> users = userRepository.findAllUsers();
         assertEquals(0, users.size());
     }
 
@@ -46,15 +49,16 @@ public class JdbcUserRepositoryTest extends IntegrationEnvironment {
     @Transactional
     @Rollback
     public void addUserAlreadyExistsTest() {
-        userRepository.addUser(111111111L);
+        User user = new User(111111111L, null);
+        userRepository.addUser(user);
 
-        assertThrows(AttemptDoubleRegistrationException.class, () -> userRepository.addUser(111111111L));
+        assertThrows(AttemptDoubleRegistrationException.class, () -> userRepository.addUser(user));
     }
 
     @Test
     @Transactional
     @Rollback
     public void removeNonExistingUserTest() {
-        assertThrows(ChatIdNotFoundException.class, () -> userRepository.removeUser(999999999L));
+        assertThrows(UserIdNotFoundException.class, () -> userRepository.removeUser(999999999L));
     }
 }
