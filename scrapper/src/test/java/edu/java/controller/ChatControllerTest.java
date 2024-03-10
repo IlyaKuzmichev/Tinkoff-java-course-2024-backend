@@ -18,14 +18,14 @@ public class ChatControllerTest {
 
     @Test
     public void testRegisterChatSuccess() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/tg-bot/123")
+        mockMvc.perform(MockMvcRequestBuilders.post("/tg-chat/123")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void testDeleteChatSuccess() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/tg-bot/123")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/tg-chat/123")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }

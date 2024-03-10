@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/tg-bot")
+@RequestMapping("/tg-chat")
 public class ChatController {
     @PostMapping("/{id}")
     public void registerChat(@PathVariable Long id) {
