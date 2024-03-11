@@ -28,7 +28,7 @@ public class JdbcUserRepository {
 
     @Transactional
     public void addUser(User user) {
-        String sql = "INSERT INTO users(user_id) VALUES (?)";
+        String sql = "INSERT INTO users(id) VALUES (?)";
         try {
             jdbcTemplate.update(sql, user.getUserId());
         } catch (DataIntegrityViolationException e) {
@@ -39,7 +39,7 @@ public class JdbcUserRepository {
     }
 
     public void updateUser(User user) {
-        String sql = "UPDATE users SET user_status = ?::user_status_enum WHERE user_id = ?";
+        String sql = "UPDATE users SET user_status = ?::user_status_enum WHERE id = ?";
         int affected = jdbcTemplate.update(
             sql,
             UserStatusMapper.userStatusToString(user.getStatus()),
@@ -52,7 +52,7 @@ public class JdbcUserRepository {
 
     @Transactional
     public void removeUser(Long userId) {
-        String sql = "DELETE FROM users WHERE user_id = ?";
+        String sql = "DELETE FROM users WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, userId);
         if (rowsAffected == 0) {
             throw new UserIdNotFoundException(userId);
@@ -60,7 +60,7 @@ public class JdbcUserRepository {
     }
 
     public Optional<User> findUser(Long userId) {
-        String sql = "SELECT user_id, user_status FROM users WHERE user_id = ?";
+        String sql = "SELECT id, user_status FROM users WHERE id = ?";
         Optional<User> user;
         try {
             user = Optional.ofNullable(jdbcTemplate.queryForObject(sql, new UserMapper(), userId));
@@ -72,7 +72,7 @@ public class JdbcUserRepository {
 
     @Transactional(readOnly = true)
     public List<User> findAllUsers() {
-        String sql = "SELECT user_id, user_status FROM users";
+        String sql = "SELECT id, user_status FROM users";
         return jdbcTemplate.query(sql, new UserMapper());
     }
 
@@ -80,7 +80,7 @@ public class JdbcUserRepository {
 
         @Override
         public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-            Long userId = resultSet.getLong("user_id");
+            Long userId = resultSet.getLong("id");
             User.Status status = UserStatusMapper.userStatusFromString(resultSet.getString("user_status"));
             return new User(userId, status);
         }

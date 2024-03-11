@@ -4,16 +4,19 @@ import edu.java.exception.AttemptAddLinkOneMoreTimeException;
 import edu.java.exception.IncorrectRequestParametersException;
 import edu.java.models.Link;
 import java.net.URI;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class JdbcLinkRepository {
-    private static final String SELECT_LINK_ID = "SELECT link_id FROM links WHERE url = ?";
+    private static final String SELECT_LINK_ID = "SELECT id FROM links WHERE url = ?";
     private static final String GITHUB = "github";
     private static final String STACK_OVERFLOW = "stackoverflow";
     private final JdbcTemplate jdbcTemplate;
@@ -45,7 +48,7 @@ public class JdbcLinkRepository {
 
         linkId = jdbcTemplate.queryForObject(
             "INSERT INTO links(url, link_type) VALUES (?, ?::link_type_enum) "
-                + "ON CONFLICT (url) DO UPDATE SET link_type = EXCLUDED.link_type RETURNING link_id",
+                + "ON CONFLICT (url) DO UPDATE SET link_type = EXCLUDED.link_type RETURNING id",
             Long.class,
             url.toString(),
             linkType
@@ -75,12 +78,15 @@ public class JdbcLinkRepository {
 
     @Transactional
     public List<Link> findAllLinks() {
-        String sql = "SELECT link_id, url FROM links";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            long id = rs.getLong("link_id");
-            URI url = URI.create(rs.getString("url"));
-            return new Link(id, url);
-        });
+        String sql = "SELECT id, url FROM links";
+        return jdbcTemplate.query(sql, new LinkMapper());
+    }
+
+    @Transactional
+    public List<Link> findAllLinksForUser(Long userId) {
+        String sql = "SELECT id, url FROM links INNER JOIN"
+            + " user_tracked_links ON id = link_id WHERE user_id = ?";
+        return jdbcTemplate.query(sql, new LinkMapper(), userId);
     }
 
     private Long getLinkIdByUrl(String url) {
@@ -130,7 +136,7 @@ public class JdbcLinkRepository {
         String deleteStackOverflowLinkSql = "DELETE FROM stackoverflow_links WHERE link_id = ?";
         jdbcTemplate.update(deleteStackOverflowLinkSql, linkId);
 
-        String deleteAllLinksSql = "DELETE FROM links WHERE link_id = ?";
+        String deleteAllLinksSql = "DELETE FROM links WHERE id = ?";
         jdbcTemplate.update(deleteAllLinksSql, linkId);
     }
 
@@ -144,5 +150,15 @@ public class JdbcLinkRepository {
             return STACK_OVERFLOW;
         }
         return null;
+    }
+
+    private static class LinkMapper implements RowMapper<Link> {
+
+        @Override
+        public Link mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Long id = rs.getLong("id");
+            URI url = URI.create(rs.getString("url"));
+            return new Link(id, url);
+        }
     }
 }

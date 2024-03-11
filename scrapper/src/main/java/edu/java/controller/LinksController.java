@@ -32,7 +32,7 @@ public class LinksController {
     @GetMapping
     public ResponseEntity<ListLinksResponse> getAllLinks(@RequestHeader(name = "Tg-Chat-Id") Long id) {
         List<LinkResponse> links = linkService
-            .findAllLinks()
+            .findAllLinksForUser(id)
             .stream()
             .map((link) -> new LinkResponse(link.getId(), link.getUrl()))
             .toList();

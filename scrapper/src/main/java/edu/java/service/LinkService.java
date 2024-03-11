@@ -9,5 +9,5 @@ public interface LinkService {
 
     Link removeLinkByURL(Long chatId, URI url);
 
-    Collection<Link> findAllLinks();
+    Collection<Link> findAllLinksForUser(Long chatId);
 }

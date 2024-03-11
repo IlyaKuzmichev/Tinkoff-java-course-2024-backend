@@ -1,6 +1,5 @@
 package edu.java.controller.dto;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -11,14 +10,14 @@ import java.io.IOException;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 @JsonDeserialize(using = UserStatus.UserStatusDeserializer.class)
 public class UserStatus {
     private static final String BASE_STRING = "base";
     private static final String TRACK_STRING = "track_link";
     private static final String UNTRACK_STRING = "untrack_link";
 
-    @Getter
-    @Setter
     private User.Status status;
 
     public UserStatus(User.Status status) {

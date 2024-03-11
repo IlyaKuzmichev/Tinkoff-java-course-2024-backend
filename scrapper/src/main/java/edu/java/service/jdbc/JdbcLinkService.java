@@ -46,8 +46,8 @@ public class JdbcLinkService implements LinkService {
     }
 
     @Override
-    public Collection<Link> findAllLinks() {
-        return linkRepository.findAllLinks();
+    public Collection<Link> findAllLinksForUser(Long chatId) {
+        return linkRepository.findAllLinksForUser(chatId);
     }
 
     private User checkUser(Long userId, User.Status expectedStatus) {
