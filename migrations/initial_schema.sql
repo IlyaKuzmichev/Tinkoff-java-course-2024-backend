@@ -27,14 +27,14 @@ CREATE TABLE IF NOT EXISTS links
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     link_type link_type_enum NOT NULL,
     url VARCHAR UNIQUE NOT NULL,
-    last_check TIMESTAMP
+    last_check TIMESTAMPTZ
 );
 
 --changeset wilmerno:create_table_github
 CREATE TABLE IF NOT EXISTS github_links
 (
     link_id BIGINT PRIMARY KEY REFERENCES links(id) ON DELETE CASCADE,
-    last_update TIMESTAMP
+    last_update TIMESTAMPTZ
     -- another parameters for tracking TODO
 );
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS github_links
 CREATE TABLE IF NOT EXISTS stackoverflow_links
 (
     link_id BIGINT PRIMARY KEY REFERENCES links(id) ON DELETE CASCADE,
-    last_update TIMESTAMP
+    last_update TIMESTAMPTZ
     -- another parameters for tracking TODO
 );
 
@@ -53,6 +53,3 @@ CREATE TABLE IF NOT EXISTS user_tracked_links
     link_id BIGINT REFERENCES links(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, link_id)
 );
-
-
-

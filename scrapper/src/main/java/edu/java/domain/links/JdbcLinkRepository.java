@@ -2,11 +2,14 @@ package edu.java.domain.links;
 
 import edu.java.exception.AttemptAddLinkOneMoreTimeException;
 import edu.java.exception.IncorrectRequestParametersException;
+import edu.java.exception.LinkNotFoundException;
 import edu.java.models.Link;
 import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,6 +22,7 @@ public class JdbcLinkRepository {
     private static final String SELECT_LINK_ID = "SELECT id FROM links WHERE url = ?";
     private static final String GITHUB = "github";
     private static final String STACK_OVERFLOW = "stackoverflow";
+    private static final String LINK_NOT_FOUND = "User %d don't track link %s";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -68,6 +72,9 @@ public class JdbcLinkRepository {
     public Link removeLinkByURL(Long userId, URI url) {
 
         Long linkId = getLinkIdByUrl(url.toString());
+        if (linkId == null) {
+            throw new LinkNotFoundException(LINK_NOT_FOUND.formatted(userId, url));
+        }
         removeUserTrackedLink(userId, linkId);
         if (!isLinkTracked(linkId)) {
             removeLinkById(linkId);
@@ -87,6 +94,28 @@ public class JdbcLinkRepository {
         String sql = "SELECT id, url FROM links INNER JOIN"
             + " user_tracked_links ON id = link_id WHERE user_id = ?";
         return jdbcTemplate.query(sql, new LinkMapper(), userId);
+    }
+
+    @Transactional
+    public List<Link> findAllLinksWithCheckInterval(Long interval) {
+        String sql = "SELECT id, url FROM links "
+            + "WHERE last_check IS NULL OR EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_check)) > ?";
+        return jdbcTemplate.query(sql, new LinkMapper(), interval);
+    }
+
+    @Transactional
+    public boolean updateLink(Link link, OffsetDateTime updateTime) {
+        String sql = "UPDATE links SET last_check = NOW()::timestamp WHERE id = ?";
+        jdbcTemplate.update(sql, link.getId());
+        String linkType = parseLinkType(link.getUrl());
+
+        String getSql = "SELECT last_update FROM %s_links WHERE link_id = ? FOR UPDATE".formatted(linkType);
+        Optional<OffsetDateTime> lastUpdate = Optional.ofNullable(
+            jdbcTemplate.queryForObject(getSql, OffsetDateTime.class, link.getId()));
+
+        String setSql = "UPDATE %s_links SET last_update = ? WHERE link_id = ?".formatted(linkType);
+        jdbcTemplate.update(setSql, updateTime, link.getId());
+        return lastUpdate.isPresent() && updateTime.isAfter(lastUpdate.get());
     }
 
     private Long getLinkIdByUrl(String url) {
@@ -162,3 +191,35 @@ public class JdbcLinkRepository {
         }
     }
 }
+
+/*
+    @Transactional
+    public OffsetDateTime getLastUpdateForGithubLink(Long linkId) {
+        String sql = "SELECT last_update FROM github_links WHERE link_id = ?";
+        return jdbcTemplate.queryForObject(sql, OffsetDateTime.class, linkId);
+    }
+
+    @Transactional
+    public OffsetDateTime getLastUpdateForStackoverflowLink(Long linkId) {
+        String sql = "SELECT last_update FROM stackoverflow_links WHERE link_id = ?";
+        return jdbcTemplate.queryForObject(sql, OffsetDateTime.class, linkId);
+    }
+
+    @Transactional
+    public void updateGithubLink(Long linkId, OffsetDateTime time) {
+        String sql = "UPDATE github_links SET last_update = ? WHERE link_id = ?";
+        jdbcTemplate.update(sql, time, linkId);
+    }
+
+    @Transactional
+    public void updateStackoverflowLink(Long linkId, OffsetDateTime time) {
+        String sql = "UPDATE stackoverflow_links SET last_update = ? WHERE link_id = ?";
+        jdbcTemplate.update(sql, time, linkId);
+    }
+
+    @Transactional
+    public void updateLinkCheckTime(Long linkId) {
+        String sql = "UPDATE links SET last_check = ?";
+        jdbcTemplate.update(sql, OffsetDateTime.now());
+    }
+ */

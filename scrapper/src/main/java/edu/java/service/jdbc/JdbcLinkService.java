@@ -2,6 +2,7 @@ package edu.java.service.jdbc;
 
 import edu.java.domain.links.JdbcLinkRepository;
 import edu.java.domain.users.JdbcUserRepository;
+import edu.java.exception.IncorrectUserStatusException;
 import edu.java.exception.UserIdNotFoundException;
 import edu.java.models.Link;
 import edu.java.models.User;
@@ -28,10 +29,11 @@ public class JdbcLinkService implements LinkService {
     @Transactional
     public Link addLink(Long chatId, URI url) {
         User user = checkUser(chatId, User.Status.TRACK_LINK_WAITING);
-        Link link = new Link(null, url);
-        linkRepository.addLink(chatId, link);
         user.setStatus(User.Status.BASE);
         userRepository.updateUser(user);
+
+        Link link = new Link(null, url);
+        linkRepository.addLink(chatId, link);
         return link;
     }
 
@@ -39,10 +41,10 @@ public class JdbcLinkService implements LinkService {
     @Transactional
     public Link removeLinkByURL(Long chatId, URI url) {
         User user = checkUser(chatId, User.Status.UNTRACK_LINK_WAITING);
-        Link link = linkRepository.removeLinkByURL(chatId, url);
         user.setStatus(User.Status.BASE);
         userRepository.updateUser(user);
-        return link;
+
+        return linkRepository.removeLinkByURL(chatId, url);
     }
 
     @Override
@@ -50,10 +52,17 @@ public class JdbcLinkService implements LinkService {
         return linkRepository.findAllLinksForUser(chatId);
     }
 
+    @Override
+    public Collection<Link> findLinksForUpdate(Long interval) {
+        return linkRepository.findAllLinksWithCheckInterval(interval);
+    }
+
     private User checkUser(Long userId, User.Status expectedStatus) {
         Optional<User> user = userRepository.findUser(userId);
-        if (user.isEmpty() || user.get().getStatus() != expectedStatus) {
+        if (user.isEmpty()) {
             throw new UserIdNotFoundException(userId);
+        } else if (user.get().getStatus() != expectedStatus) {
+            throw new IncorrectUserStatusException(userId);
         }
         return user.get();
     }

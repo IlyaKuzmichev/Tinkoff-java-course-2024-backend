@@ -10,4 +10,6 @@ public interface LinkService {
     Link removeLinkByURL(Long chatId, URI url);
 
     Collection<Link> findAllLinksForUser(Long chatId);
+
+    Collection<Link> findLinksForUpdate(Long interval);
 }

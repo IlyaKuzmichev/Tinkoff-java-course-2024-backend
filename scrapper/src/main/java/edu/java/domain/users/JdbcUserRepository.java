@@ -3,6 +3,7 @@ package edu.java.domain.users;
 import edu.java.domain.mappers.UserStatusMapper;
 import edu.java.exception.AttemptDoubleRegistrationException;
 import edu.java.exception.UserIdNotFoundException;
+import edu.java.models.Link;
 import edu.java.models.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -74,6 +75,13 @@ public class JdbcUserRepository {
     public List<User> findAllUsers() {
         String sql = "SELECT id, user_status FROM users";
         return jdbcTemplate.query(sql, new UserMapper());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> findUsersTrackLink(Link link) {
+        String sql = "SELECT user_id FROM user_tracked_links WHERE link_id = ?";
+        return jdbcTemplate.query(sql, (resultSet, rowNum) ->
+            resultSet.getLong("user_id"), link.getId());
     }
 
     private static class UserMapper implements RowMapper<User> {

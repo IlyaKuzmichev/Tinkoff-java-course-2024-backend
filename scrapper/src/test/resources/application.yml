@@ -1,8 +1,9 @@
 app:
   scheduler:
     enable: true
-    interval: 10s
+    invoke-interval: 5s
     force-check-delay: 10s
+    check-interval: 1000s
 
 client:
   github:
