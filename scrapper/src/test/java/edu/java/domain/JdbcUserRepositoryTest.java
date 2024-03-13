@@ -11,9 +11,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class JdbcUserRepositoryTest extends IntegrationEnvironment {
@@ -60,5 +62,17 @@ public class JdbcUserRepositoryTest extends IntegrationEnvironment {
     @Rollback
     public void testRemoveNonExistingUser() {
         assertThrows(UserIdNotFoundException.class, () -> userRepository.removeUser(999999999L));
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    public void testFindUserByUserId() {
+        User user = new User(13L, User.Status.BASE);
+        userRepository.addUser(user);
+        Optional<User> optUser = userRepository.findUser(13L);
+
+        assertTrue(optUser.isPresent());
+        assertEquals(user, optUser.get());
     }
 }
