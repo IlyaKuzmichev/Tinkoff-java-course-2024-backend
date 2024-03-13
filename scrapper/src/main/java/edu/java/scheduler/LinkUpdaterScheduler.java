@@ -3,6 +3,7 @@ package edu.java.scheduler;
 import edu.java.clients.bot.BotClient;
 import edu.java.models.Link;
 import edu.java.service.LinkService;
+import edu.java.service.LinkUpdater;
 import edu.java.service.UserService;
 import edu.java.service.update_checker.UpdateChecker;
 import java.time.Duration;
@@ -25,14 +26,18 @@ public final class LinkUpdaterScheduler {
     private final List<UpdateChecker> updateCheckerList;
     private final Duration checkInterval;
 
+    private final LinkUpdater linkUpdater;
+
     @Autowired
     public LinkUpdaterScheduler(LinkService linkService, UserService userService, BotClient botClient,
-        List<UpdateChecker> updateCheckerList, @Value("#{@scheduler.checkInterval()}") Duration checkInterval
+        List<UpdateChecker> updateCheckerList, LinkUpdater linkUpdater,
+        @Value("#{@scheduler.checkInterval()}") Duration checkInterval
     ) {
         this.linkService = linkService;
         this.userService = userService;
         this.botClient = botClient;
         this.updateCheckerList = updateCheckerList;
+        this.linkUpdater = linkUpdater;
         this.checkInterval = checkInterval;
     }
 

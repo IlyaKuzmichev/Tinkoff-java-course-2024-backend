@@ -9,7 +9,8 @@ import java.util.List;
 
 public record StackOverflowQuestionResponse(
     @JsonProperty("question_id") int questionId,
-    @JsonProperty("last_activity_date") long lastActivityDateUnix
+    @JsonProperty("last_activity_date") long lastActivityDateUnix,
+    @JsonProperty("answer_count") int answersCount
 ) {
     public OffsetDateTime getLastActivityDate() {
         return OffsetDateTime.ofInstant(Instant.ofEpochSecond(lastActivityDateUnix), ZoneId.systemDefault());

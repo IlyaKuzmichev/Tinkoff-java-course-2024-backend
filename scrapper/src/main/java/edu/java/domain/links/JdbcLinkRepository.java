@@ -2,6 +2,7 @@ package edu.java.domain.links;
 
 import edu.java.exception.AttemptAddLinkOneMoreTimeException;
 import edu.java.exception.LinkNotFoundException;
+import edu.java.models.GithubLinkInfo;
 import edu.java.models.Link;
 import java.net.URI;
 import java.sql.ResultSet;
@@ -10,6 +11,9 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import edu.java.models.LinkInfo;
+import edu.java.models.StackoverflowLinkInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,7 +58,7 @@ public class JdbcLinkRepository {
             url.toString(),
             linkType
         );
-        addLinkToCommonTable(Objects.requireNonNull(linkId), linkType);
+        addLinkToSpecificTable(Objects.requireNonNull(linkId), linkType);
 
         return linkId;
     }
@@ -96,18 +100,38 @@ public class JdbcLinkRepository {
     }
 
     @Transactional
-    public boolean updateLink(Link link, OffsetDateTime updateTime) {
+    public LinkInfo updateLink(LinkInfo linkInfo) {
         String sql = "UPDATE links SET last_check = NOW()::timestamp WHERE id = ?";
+        Link link = linkInfo.getLink();
         jdbcTemplate.update(sql, link.getId());
         String linkType = parseLinkType(link.getUrl());
 
-        String getSql = "SELECT last_update FROM %s_links WHERE link_id = ? FOR UPDATE".formatted(linkType);
-        Optional<OffsetDateTime> lastUpdate = Optional.ofNullable(
-            jdbcTemplate.queryForObject(getSql, OffsetDateTime.class, link.getId()));
+        LinkInfo oldInfo;
+        if (linkInfo instanceof GithubLinkInfo) {
+            String getSql = "SELECT last_update, pull_requests_count FROM github_links WHERE link_id = ? FOR UPDATE";
+            oldInfo = jdbcTemplate.queryForObject(getSql, (rs, rowNum) -> {
+                Optional<OffsetDateTime> lastUpdate = Optional.ofNullable(rs.getObject("last_update", OffsetDateTime.class));
+                Integer pullRequestsCount = rs.getInt("pull_requests_count");
+                return new GithubLinkInfo(link, lastUpdate, pullRequestsCount);
+            });
 
-        String setSql = "UPDATE %s_links SET last_update = ? WHERE link_id = ?".formatted(linkType);
-        jdbcTemplate.update(setSql, updateTime, link.getId());
-        return lastUpdate.isPresent() && updateTime.isAfter(lastUpdate.get());
+            String setSql = "UPDATE github_links SET last_update = ?, pull_requests_count = ? WHERE link_id = ?";
+            jdbcTemplate.update(setSql, linkInfo.getUpdateTime(), ((GithubLinkInfo) linkInfo).getPullRequestsCount(), link.getId());
+        } else if (linkInfo instanceof StackoverflowLinkInfo) {
+            String getSql = "SELECT last_update, answers_count FROM github_links WHERE link_id = ? FOR UPDATE";
+            oldInfo = jdbcTemplate.queryForObject(getSql, (rs, rowNum) -> {
+                Optional<OffsetDateTime> lastUpdate = Optional.ofNullable(rs.getObject("last_update", OffsetDateTime.class));
+                Integer answersCount = rs.getInt("answers_count");
+                return new StackoverflowLinkInfo(link, lastUpdate, answersCount);
+            });
+
+            String setSql = "UPDATE stackoverflow_links SET last_update = ?, answers_count = ? WHERE link_id = ?";
+            jdbcTemplate.update(setSql, linkInfo.getUpdateTime(), ((StackoverflowLinkInfo) linkInfo).getAnswersCount(), link.getId());
+        } else {
+            throw new RuntimeException("cho za tip");
+        }
+
+        return oldInfo;
     }
 
     private Long getLinkIdByUrl(String url) {
@@ -118,7 +142,7 @@ public class JdbcLinkRepository {
         }
     }
 
-    private void addLinkToCommonTable(long linkId, String linkType) {
+    private void addLinkToSpecificTable(long linkId, String linkType) {
         String sql = "INSERT INTO %s_links (link_id) VALUES (?) ON CONFLICT DO NOTHING".formatted(linkType);
         jdbcTemplate.update(sql, linkId);
     }

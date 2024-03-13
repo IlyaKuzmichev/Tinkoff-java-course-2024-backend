@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS links
 CREATE TABLE IF NOT EXISTS github_links
 (
     link_id BIGINT PRIMARY KEY REFERENCES links(id) ON DELETE CASCADE,
-    last_update TIMESTAMPTZ
+    last_update TIMESTAMPTZ,
+    pull_requests_count INTEGER NOT NULL DEFAULT 0
     -- another parameters for tracking TODO
 );
 
@@ -42,7 +43,8 @@ CREATE TABLE IF NOT EXISTS github_links
 CREATE TABLE IF NOT EXISTS stackoverflow_links
 (
     link_id BIGINT PRIMARY KEY REFERENCES links(id) ON DELETE CASCADE,
-    last_update TIMESTAMPTZ
+    last_update TIMESTAMPTZ,
+    answers_count INTEGER NOT NULL DEFAULT 0
     -- another parameters for tracking TODO
 );
 
