@@ -4,6 +4,7 @@ import edu.java.clients.stackoverflow.StackOverflowClient;
 import edu.java.models.Link;
 import edu.java.service.LinkUpdater;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,23 +23,25 @@ public class StackoverflowUpdateChecker implements UpdateChecker {
 
     @Override
     public Optional<String> checkUpdates(Link link) {
-        Integer questionId = Arrays.stream(link
+        Optional<Integer> questionId = Arrays.stream(link
             .getUrl()
             .getPath()
             .split("/"))
             .skip(2)
             .findFirst()
-            .map(Integer::parseUnsignedInt)
-            .get();
-        var response =  stackOverflowClient.fetchQuestion(questionId).block();
-        if (response.isEmpty()) {
+            .map(Integer::parseUnsignedInt);
+        if (questionId.isEmpty()) {
+            return Optional.empty();
+        }
+        var response =  stackOverflowClient.fetchQuestion(questionId.get()).block();
+        if (Objects.requireNonNull(response).isEmpty()) {
             return Optional.empty();
         }
         return linkUpdater.update(link, response.get().getLastActivityDate());
     }
 
     @Override
-    public boolean isCommonChecker(Link link) {
+    public boolean isAppropriateLink(Link link) {
         return link.getUrl().getHost().equals(HOST);
     }
 }

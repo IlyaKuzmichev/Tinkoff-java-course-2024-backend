@@ -8,8 +8,9 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import edu.java.bot.processor.commands.Command;
 import edu.java.bot.service.ResponseService;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class MyTelegramBot implements UpdatesListener {
@@ -30,11 +31,14 @@ public class MyTelegramBot implements UpdatesListener {
 
     @Override
     public int process(List<Update> list) {
+
         for (var update : list) {
-            log.debug(update.message().text());
-            log.debug(update.message().chat().toString());
-            if (update.message() != null) {
-                bot.execute(new SendMessage(update.message().chat().id(), responseService.getAnswer(update)));
+            try {
+                if (update.message() != null && update.message().text() != null) {
+                    bot.execute(new SendMessage(update.message().chat().id(), responseService.getAnswer(update)));
+                }
+            } catch (RuntimeException e) {
+                log.debug(Arrays.toString(e.getStackTrace()));
             }
         }
         return UpdatesListener.CONFIRMED_UPDATES_ALL;

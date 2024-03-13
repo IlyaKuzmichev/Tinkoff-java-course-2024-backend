@@ -37,13 +37,13 @@ public class ChatController {
 
     @PutMapping("/{id}/status")
     public void setStatus(@PathVariable Long id, @RequestBody SetStatusRequest request) {
-        userService.updateUser(new User(id, request.status().getStatus()));
+        userService.updateUser(new User(id, request.status()));
     }
 
     @GetMapping("/{id}/status")
     public ResponseEntity<GetStatusResponse> getStatus(@PathVariable Long id) {
         User user = userService.findUser(id);
 
-        return ResponseEntity.ok(new GetStatusResponse(user.getStatus().toString()));
+        return ResponseEntity.ok(new GetStatusResponse(user.getStatus()));
     }
 }

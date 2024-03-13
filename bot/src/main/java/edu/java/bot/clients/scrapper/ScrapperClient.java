@@ -1,9 +1,10 @@
 package edu.java.bot.clients.scrapper;
 
+import edu.java.bot.clients.scrapper.dto.GetStatusResponse;
 import edu.java.bot.clients.scrapper.dto.LinkResponse;
 import edu.java.bot.clients.scrapper.dto.ListLinksResponse;
-import java.net.URI;
 import edu.java.bot.clients.scrapper.dto.UserStatus;
+import java.net.URI;
 import reactor.core.publisher.Mono;
 
 public interface ScrapperClient {
@@ -13,7 +14,7 @@ public interface ScrapperClient {
 
     Mono<Void> setUserStatus(Long chatId, UserStatus status);
 
-    Mono<UserStatus> getUserStatus(Long chatId);
+    Mono<GetStatusResponse> getUserStatus(Long chatId);
 
     Mono<ListLinksResponse> listLinks(Long chatId);
 

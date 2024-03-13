@@ -49,7 +49,7 @@ public final class LinkUpdaterScheduler {
 
     private void updateLink(Link link) {
         for (UpdateChecker checker : updateCheckerList) {
-            if (checker.isCommonChecker(link)) {
+            if (checker.isAppropriateLink(link)) {
                 Optional<String> result = checker.checkUpdates(link);
                 result.ifPresent(updateMessage -> sendUpdatesToUsers(link, updateMessage));
                 break;
@@ -59,6 +59,6 @@ public final class LinkUpdaterScheduler {
 
     private void sendUpdatesToUsers(Link link, String updateMessage) {
         List<Long> userIds = userService.getUsersTrackLink(link);
-        botClient.sendUpdates(link.getId(), link.getUrl(), updateMessage, userIds);
+        botClient.sendUpdates(link.getId(), link.getUrl(), updateMessage, userIds).block();
     }
 }

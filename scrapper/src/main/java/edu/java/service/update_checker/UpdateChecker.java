@@ -7,5 +7,5 @@ public interface UpdateChecker {
 
     Optional<String> checkUpdates(Link link);
 
-    boolean isCommonChecker(Link link);
+    boolean isAppropriateLink(Link link);
 }

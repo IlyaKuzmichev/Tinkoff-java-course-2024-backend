@@ -8,6 +8,7 @@ import edu.java.bot.processor.LinkChecker;
 import edu.java.bot.processor.commands.Command;
 import java.net.URI;
 import java.util.Map;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 
 
@@ -43,7 +44,7 @@ public class ResponseService {
         Long chatId = update.message().chat().id();
 
         try {
-            UserStatus status = scrapperClient.getUserStatus(chatId).block();
+            UserStatus status = Objects.requireNonNull(scrapperClient.getUserStatus(chatId).block()).status();
             if (status != UserStatus.BASE) {
                 String link = update.message().text();
                 linkChecker.loadLink(link);
@@ -61,10 +62,10 @@ public class ResponseService {
 
     private String linkProcess(Long chatId, String link, UserStatus status) {
         if (status == UserStatus.TRACK_LINK) {
-            scrapperClient.addLink(chatId, URI.create(link));
+            scrapperClient.addLink(chatId, URI.create(link)).block();
             return SUCCESS_ADD;
         } else {
-            scrapperClient.removeLink(chatId, URI.create(link));
+            scrapperClient.removeLink(chatId, URI.create(link)).block();
             return SUCCESS_REMOVE;
         }
     }

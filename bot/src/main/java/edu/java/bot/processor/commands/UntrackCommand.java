@@ -4,8 +4,6 @@ import com.pengrad.telegrambot.model.Update;
 import edu.java.bot.clients.scrapper.ScrapperClient;
 import edu.java.bot.clients.scrapper.dto.UserStatus;
 import edu.java.bot.clients.scrapper.exception.CustomClientException;
-import edu.java.bot.database.UserRegistry;
-import edu.java.bot.database.UserState;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 

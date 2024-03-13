@@ -2,6 +2,7 @@ package edu.java.bot.clients.scrapper;
 
 import edu.java.bot.clients.scrapper.dto.AddLinkRequest;
 import edu.java.bot.clients.scrapper.dto.ClientErrorResponse;
+import edu.java.bot.clients.scrapper.dto.GetStatusResponse;
 import edu.java.bot.clients.scrapper.dto.LinkResponse;
 import edu.java.bot.clients.scrapper.dto.ListLinksResponse;
 import edu.java.bot.clients.scrapper.dto.RemoveLinkRequest;
@@ -75,7 +76,7 @@ public class RestScrapperClient implements ScrapperClient {
     }
 
     @Override
-    public Mono<UserStatus> getUserStatus(Long chatId) {
+    public Mono<GetStatusResponse> getUserStatus(Long chatId) {
         return webClient
             .get()
             .uri(STATUS.formatted(chatId))
@@ -84,7 +85,7 @@ public class RestScrapperClient implements ScrapperClient {
                 response.bodyToMono(ClientErrorResponse.class)
                     .flatMap(clientErrorResponse ->
                         Mono.error(new CustomClientException(clientErrorResponse))))
-            .bodyToMono(UserStatus.class);
+            .bodyToMono(GetStatusResponse.class);
     }
 
     @Override

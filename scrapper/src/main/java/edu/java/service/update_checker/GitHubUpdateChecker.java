@@ -30,7 +30,7 @@ public class GitHubUpdateChecker implements UpdateChecker {
     }
 
     @Override
-    public boolean isCommonChecker(Link link) {
+    public boolean isAppropriateLink(Link link) {
         return link.getUrl().getHost().equals(HOST);
     }
 }

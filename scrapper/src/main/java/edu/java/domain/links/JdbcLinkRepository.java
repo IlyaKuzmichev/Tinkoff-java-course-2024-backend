@@ -1,7 +1,6 @@
 package edu.java.domain.links;
 
 import edu.java.exception.AttemptAddLinkOneMoreTimeException;
-import edu.java.exception.IncorrectRequestParametersException;
 import edu.java.exception.LinkNotFoundException;
 import edu.java.models.Link;
 import java.net.URI;
@@ -9,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -45,9 +45,6 @@ public class JdbcLinkRepository {
 
     private Long insertLinkIntoTables(URI url) {
         String linkType = parseLinkType(url);
-        if (linkType == null) {
-            throw new IncorrectRequestParametersException("Invalid link for scrapper tracking");
-        }
         Long linkId;
 
         linkId = jdbcTemplate.queryForObject(
@@ -57,7 +54,7 @@ public class JdbcLinkRepository {
             url.toString(),
             linkType
         );
-        addLinkToCommonTable(linkId, linkType);
+        addLinkToCommonTable(Objects.requireNonNull(linkId), linkType);
 
         return linkId;
     }

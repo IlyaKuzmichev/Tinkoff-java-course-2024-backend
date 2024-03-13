@@ -1,4 +1,6 @@
 package edu.java.controller.dto;
 
-public record SetStatusRequest(UserStatus status) {
+import edu.java.models.User;
+
+public record SetStatusRequest(User.Status status) {
 }

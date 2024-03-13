@@ -1,4 +1,6 @@
 package edu.java.controller.dto;
 
-public record GetStatusResponse(String status) {
+import edu.java.models.User;
+
+public record GetStatusResponse(User.Status status) {
 }
