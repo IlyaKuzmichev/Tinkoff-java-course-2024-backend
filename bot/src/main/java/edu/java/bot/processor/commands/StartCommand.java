@@ -1,8 +1,8 @@
 package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
-import edu.java.bot.database.User;
-import edu.java.bot.database.UserRegistry;
+import edu.java.bot.clients.scrapper.ScrapperClient;
+import edu.java.bot.clients.scrapper.exception.CustomClientException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +13,11 @@ public final class StartCommand implements Command {
     private static final String DESCRIPTION = "Register new user";
     private static final String REGISTRATION_SUCCESS = "You were successfully registered";
     private static final String ALREADY_REGISTERED = "You're already registered";
-    UserRegistry userRegistry;
 
-    public StartCommand(UserRegistry userRegistry) {
-        this.userRegistry = userRegistry;
+    ScrapperClient scrapperClient;
+
+    public StartCommand(ScrapperClient scrapperClient) {
+        this.scrapperClient = scrapperClient;
     }
 
     @Override
@@ -31,11 +32,12 @@ public final class StartCommand implements Command {
 
     @Override
     public String execute(Update update) {
-        var userId = update.message().chat().id();
-        if (userRegistry.getUser(userId).isEmpty()) {
-            userRegistry.putUser(new User(userId));
-            return REGISTRATION_SUCCESS;
+        var chatId = update.message().chat().id();
+        try {
+            scrapperClient.registerChat(chatId).block();
+        } catch (CustomClientException e) {
+            return e.getClientErrorResponse().exceptionMessage();
         }
-        return ALREADY_REGISTERED;
+        return REGISTRATION_SUCCESS;
     }
 }

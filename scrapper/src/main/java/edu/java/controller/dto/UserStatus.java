@@ -35,8 +35,8 @@ public class UserStatus {
             String stringifiedStatus = jsonParser.getValueAsString();
             User.Status status = switch (stringifiedStatus) {
                 case BASE_STRING -> User.Status.BASE;
-                case TRACK_STRING -> User.Status.TRACK_LINK_WAITING;
-                case UNTRACK_STRING -> User.Status.UNTRACK_LINK_WAITING;
+                case TRACK_STRING -> User.Status.TRACK_LINK;
+                case UNTRACK_STRING -> User.Status.UNTRACK_LINK;
                 default -> throw new NotUserStatusException(stringifiedStatus);
             };
             return new UserStatus(status);

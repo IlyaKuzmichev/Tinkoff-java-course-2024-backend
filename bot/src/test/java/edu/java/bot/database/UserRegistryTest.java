@@ -1,5 +1,6 @@
 package edu.java.bot.database;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -7,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled
 public class UserRegistryTest {
 
     private static final String LINK_GITHUB = "https://github.com";

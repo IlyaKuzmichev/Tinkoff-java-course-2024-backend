@@ -1,11 +1,12 @@
 package edu.java.bot.service;
 
 import com.pengrad.telegrambot.model.Update;
-import edu.java.bot.database.User;
-import edu.java.bot.database.UserRegistry;
-import edu.java.bot.database.UserState;
+import edu.java.bot.clients.scrapper.ScrapperClient;
+import edu.java.bot.clients.scrapper.dto.UserStatus;
+import edu.java.bot.clients.scrapper.exception.CustomClientException;
 import edu.java.bot.processor.LinkChecker;
 import edu.java.bot.processor.commands.Command;
+import java.net.URI;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
@@ -13,21 +14,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class ResponseService {
     private static final String NOT_VALID_LINK = "Not valid link";
-    private static final String NOT_VALID_RESOURCE = "Not valid resource for tracking";
-    private static final String ALREADY_TRACKING = "Link is already tracking";
     private static final String SUCCESS_ADD = "Link successfully added for tracking";
-    private static final String NOT_CONTAINS_LINK = "Nothing to remove, you don't contain this link in tracking list";
     private static final String SUCCESS_REMOVE = "Link successfully removed from tracking list";
     private static final String NOT_SUPPORTED = "Operation not supported";
-    private static final String NEED_REGISTRATION = "Please, pass the registration with /start command";
     private final Map<String, Command> commandMap;
     private final LinkChecker linkChecker;
-    private final UserRegistry userRegistry;
+    private final ScrapperClient scrapperClient;
 
-    public ResponseService(Map<String, Command> commandMap, UserRegistry userRegistry, LinkChecker linkChecker) {
+    public ResponseService(Map<String, Command> commandMap, LinkChecker linkChecker, ScrapperClient scrapperClient) {
         this.commandMap = commandMap;
-        this.userRegistry = userRegistry;
         this.linkChecker = linkChecker;
+        this.scrapperClient = scrapperClient;
     }
 
     public String getAnswer(Update update) {
@@ -43,31 +40,32 @@ public class ResponseService {
     }
 
     private String nonCommandHandler(Update update) {
-        var user = userRegistry.getUser(update.message().chat().id());
-        if (user.isPresent() && user.get().getState() != UserState.BASE) {
-            var message = userTrackingProcess(user.get(), update.message().text());
-            user.get().setState(UserState.BASE);
-            return message;
+        Long chatId = update.message().chat().id();
+
+        try {
+            UserStatus status = scrapperClient.getUserStatus(chatId).block();
+            if (status != UserStatus.BASE) {
+                String link = update.message().text();
+                linkChecker.loadLink(link);
+                if (!linkChecker.isPossibleToTrack()) {
+                    scrapperClient.setUserStatus(chatId, UserStatus.BASE).block();
+                    return NOT_VALID_LINK;
+                }
+                return linkProcess(chatId, link, status);
+            }
+        } catch (CustomClientException e) {
+            return e.getClientErrorResponse().exceptionMessage();
         }
-        return user.isPresent() ? NOT_SUPPORTED : NEED_REGISTRATION;
+        return NOT_SUPPORTED;
     }
 
-    private String userTrackingProcess(User user, String link) {
-        linkChecker.loadLink(link);
-        if (!linkChecker.isValidLink()) {
-            return NOT_VALID_LINK;
-        }
-        if (!linkChecker.isPossibleToTrack()) {
-            return NOT_VALID_RESOURCE;
-        }
-        return linkProcess(user, linkChecker.getHost(), link);
-    }
-
-    private String linkProcess(User user, String domain, String link) {
-        if (user.getState() == UserState.WAIT_TRACK_URI) {
-            return userRegistry.addLink(user, domain, link) ? SUCCESS_ADD : ALREADY_TRACKING;
+    private String linkProcess(Long chatId, String link, UserStatus status) {
+        if (status == UserStatus.TRACK_LINK) {
+            scrapperClient.addLink(chatId, URI.create(link));
+            return SUCCESS_ADD;
         } else {
-            return userRegistry.removeLink(user, domain, link) ? SUCCESS_REMOVE : NOT_CONTAINS_LINK;
+            scrapperClient.removeLink(chatId, URI.create(link));
+            return SUCCESS_REMOVE;
         }
     }
 }

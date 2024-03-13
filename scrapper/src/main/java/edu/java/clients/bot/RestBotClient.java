@@ -24,7 +24,8 @@ public class RestBotClient implements BotClient {
 
     @Override
     public Mono<Void> sendUpdates(Long id, URI url, String description, List<Long> tgChatIds) {
-        return webClient.post()
+        return webClient
+            .post()
             .uri(UPDATES_ENDPOINT)
             .bodyValue(new LinkUpdateRequest(id, url, description, tgChatIds))
             .retrieve()

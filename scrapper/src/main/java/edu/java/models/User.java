@@ -11,8 +11,8 @@ import lombok.Setter;
 public class User {
     public enum Status {
         BASE,
-        TRACK_LINK_WAITING,
-        UNTRACK_LINK_WAITING
+        TRACK_LINK,
+        UNTRACK_LINK
     }
 
     private Long userId;

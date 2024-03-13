@@ -28,7 +28,7 @@ public class JdbcLinkService implements LinkService {
     @Override
     @Transactional
     public Link addLink(Long chatId, URI url) {
-        User user = checkUser(chatId, User.Status.TRACK_LINK_WAITING);
+        User user = checkUser(chatId, User.Status.TRACK_LINK);
         user.setStatus(User.Status.BASE);
         userRepository.updateUser(user);
 
@@ -40,7 +40,7 @@ public class JdbcLinkService implements LinkService {
     @Override
     @Transactional
     public Link removeLinkByURL(Long chatId, URI url) {
-        User user = checkUser(chatId, User.Status.UNTRACK_LINK_WAITING);
+        User user = checkUser(chatId, User.Status.UNTRACK_LINK);
         user.setStatus(User.Status.BASE);
         userRepository.updateUser(user);
 

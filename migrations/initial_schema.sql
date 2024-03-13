@@ -4,8 +4,8 @@
 --changeset wilmerno:create_user_status_enum
 CREATE TYPE user_status_enum AS ENUM (
     'base',
-    'track_link_waiting',
-    'untrack_link_waiting'
+    'track_link',
+    'untrack_link'
     );
 
 --changeset wilmerno:create_link_type_enum

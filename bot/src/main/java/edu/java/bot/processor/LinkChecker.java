@@ -13,7 +13,6 @@ public class LinkChecker {
     private final URITracker trackers;
 
     public LinkChecker(URITracker trackers) {
-
         this.trackers = trackers;
     }
 
@@ -28,11 +27,7 @@ public class LinkChecker {
         }
     }
 
-    public boolean isValidLink() {
-        return !host.equals(INVALID_LINK);
-    }
-
     public boolean isPossibleToTrack() {
-        return trackers.checkResource(host);
+        return !host.equals(INVALID_LINK) && trackers.checkResource(host);
     }
 }
