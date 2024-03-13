@@ -16,12 +16,7 @@ public class TelegramBotConfig {
     @Bean
     public MyTelegramBot bot(ApplicationConfig applicationConfig, List<Command> commandList,
         ResponseService responseService) {
-        String token = System.getenv("TELEGRAM_TOKEN");
-        if (token == null) {
-            token = applicationConfig.telegramToken();
-        }
-
-        var bot = new MyTelegramBot(new TelegramBot(token), commandList, responseService);
+        var bot = new MyTelegramBot(new TelegramBot(applicationConfig.telegramToken()), commandList, responseService);
         bot.start();
         return bot;
     }

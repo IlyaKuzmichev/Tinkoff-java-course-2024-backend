@@ -2,7 +2,7 @@ package edu.java.domain.mappers;
 
 import edu.java.models.User;
 
-public class UserStatusMapper {
+public final class UserStatusMapper {
     private static final String BASE_STRING = "base";
     private static final String TRACK_STRING = "track_link_waiting";
     private static final String UNTRACK_STRING = "untrack_link_waiting";

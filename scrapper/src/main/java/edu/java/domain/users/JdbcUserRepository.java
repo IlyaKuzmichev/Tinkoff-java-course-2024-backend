@@ -84,7 +84,7 @@ public class JdbcUserRepository {
             resultSet.getLong("user_id"), link.getId());
     }
 
-    private static class UserMapper implements RowMapper<User> {
+    private static final class UserMapper implements RowMapper<User> {
 
         @Override
         public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {

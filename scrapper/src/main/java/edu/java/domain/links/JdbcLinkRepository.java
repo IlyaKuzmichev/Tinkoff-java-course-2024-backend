@@ -57,12 +57,7 @@ public class JdbcLinkRepository {
             url.toString(),
             linkType
         );
-
-        if (linkType.equals(GITHUB)) {
-            addGithubLink(linkId);
-        } else if (linkType.equals(STACK_OVERFLOW)) {
-            addStackOverflowLink(linkId);
-        }
+        addLinkToCommonTable(linkId, linkType);
 
         return linkId;
     }
@@ -126,13 +121,8 @@ public class JdbcLinkRepository {
         }
     }
 
-    private void addGithubLink(long linkId) {
-        String sql = "INSERT INTO github_links (link_id) VALUES (?) ON CONFLICT DO NOTHING";
-        jdbcTemplate.update(sql, linkId);
-    }
-
-    private void addStackOverflowLink(long linkId) {
-        String sql = "INSERT INTO stackoverflow_links (link_id) VALUES (?) ON CONFLICT DO NOTHING";
+    private void addLinkToCommonTable(long linkId, String linkType) {
+        String sql = "INSERT INTO %s_links (link_id) VALUES (?) ON CONFLICT DO NOTHING".formatted(linkType);
         jdbcTemplate.update(sql, linkId);
     }
 
@@ -181,7 +171,7 @@ public class JdbcLinkRepository {
         return null;
     }
 
-    private static class LinkMapper implements RowMapper<Link> {
+    private static final class LinkMapper implements RowMapper<Link> {
 
         @Override
         public Link mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -191,35 +181,3 @@ public class JdbcLinkRepository {
         }
     }
 }
-
-/*
-    @Transactional
-    public OffsetDateTime getLastUpdateForGithubLink(Long linkId) {
-        String sql = "SELECT last_update FROM github_links WHERE link_id = ?";
-        return jdbcTemplate.queryForObject(sql, OffsetDateTime.class, linkId);
-    }
-
-    @Transactional
-    public OffsetDateTime getLastUpdateForStackoverflowLink(Long linkId) {
-        String sql = "SELECT last_update FROM stackoverflow_links WHERE link_id = ?";
-        return jdbcTemplate.queryForObject(sql, OffsetDateTime.class, linkId);
-    }
-
-    @Transactional
-    public void updateGithubLink(Long linkId, OffsetDateTime time) {
-        String sql = "UPDATE github_links SET last_update = ? WHERE link_id = ?";
-        jdbcTemplate.update(sql, time, linkId);
-    }
-
-    @Transactional
-    public void updateStackoverflowLink(Long linkId, OffsetDateTime time) {
-        String sql = "UPDATE stackoverflow_links SET last_update = ? WHERE link_id = ?";
-        jdbcTemplate.update(sql, time, linkId);
-    }
-
-    @Transactional
-    public void updateLinkCheckTime(Long linkId) {
-        String sql = "UPDATE links SET last_check = ?";
-        jdbcTemplate.update(sql, OffsetDateTime.now());
-    }
- */

@@ -24,7 +24,7 @@ public class UserStatus {
         this.status = status;
     }
 
-    public static class UserStatusDeserializer extends StdDeserializer<UserStatus> {
+    public static final class UserStatusDeserializer extends StdDeserializer<UserStatus> {
         private UserStatusDeserializer() {
             super(UserStatus.class);
         }
