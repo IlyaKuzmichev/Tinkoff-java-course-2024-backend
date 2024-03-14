@@ -1,11 +1,10 @@
 package edu.java.service.update_checker;
 
 import edu.java.clients.stackoverflow.StackOverflowClient;
+import edu.java.exception.IncorrectRequestParametersException;
 import edu.java.models.Link;
 import edu.java.models.StackoverflowLinkInfo;
-import edu.java.service.LinkUpdater;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,37 +12,38 @@ import org.springframework.stereotype.Service;
 @Service
 public class StackoverflowUpdateChecker implements UpdateChecker {
     private static final String HOST = "stackoverflow.com";
+    private static final String TYPE = "stackoverflow";
     private final StackOverflowClient stackOverflowClient;
-    private final LinkUpdater linkUpdater;
 
     @Autowired
-    public StackoverflowUpdateChecker(StackOverflowClient stackOverflowClient, LinkUpdater linkUpdater) {
+    public StackoverflowUpdateChecker(StackOverflowClient stackOverflowClient) {
         this.stackOverflowClient = stackOverflowClient;
-        this.linkUpdater = linkUpdater;
     }
 
     @Override
-    public Optional<String> checkUpdates(Link link) {
+    public StackoverflowLinkInfo checkUpdates(Link link) {
         Optional<Integer> questionId = Arrays.stream(link
-            .getUrl()
-            .getPath()
-            .split("/"))
+                .getUrl()
+                .getPath()
+                .split("/"))
             .skip(2)
             .findFirst()
             .map(Integer::parseUnsignedInt);
-        if (questionId.isEmpty()) {
-            return Optional.empty();
+        try {
+            var response = stackOverflowClient.fetchQuestion(questionId.get()).block().get();
+            return new StackoverflowLinkInfo(link, response.getLastActivityDate(), response.answersCount());
+        } catch (RuntimeException e) {
+            throw new IncorrectRequestParametersException("Error with link check, try again");
         }
-        var response =  stackOverflowClient.fetchQuestion(questionId.get()).block();
-        if (Objects.requireNonNull(response).isEmpty()) {
-            return Optional.empty();
-        }
-        return linkUpdater.update(new StackoverflowLinkInfo(link, Optional.of(response.get().getLastActivityDate()),
-            response.get().answersCount()));
     }
 
     @Override
     public boolean isAppropriateLink(Link link) {
         return link.getUrl().getHost().equals(HOST);
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
     }
 }

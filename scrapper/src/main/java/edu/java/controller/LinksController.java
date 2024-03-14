@@ -6,7 +6,6 @@ import edu.java.controller.dto.ListLinksResponse;
 import edu.java.controller.dto.RemoveLinkRequest;
 import edu.java.models.Link;
 import edu.java.service.LinkService;
-import java.net.URI;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +41,7 @@ public class LinksController {
     @PostMapping
     public ResponseEntity<LinkResponse> addLink(@RequestHeader(name = "Tg-Chat-Id") Long chatId,
         @RequestBody AddLinkRequest addLinkRequest) {
-        Link link = linkService.addLink(chatId, URI.create(addLinkRequest.link()));
+        Link link = linkService.addLink(chatId, addLinkRequest.link());
         return ResponseEntity.ok(new LinkResponse(link.getId(), link.getUrl()));
     }
 

@@ -4,16 +4,13 @@ import edu.java.exception.AttemptAddLinkOneMoreTimeException;
 import edu.java.exception.LinkNotFoundException;
 import edu.java.models.GithubLinkInfo;
 import edu.java.models.Link;
+import edu.java.models.LinkInfo;
+import edu.java.models.StackoverflowLinkInfo;
 import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import edu.java.models.LinkInfo;
-import edu.java.models.StackoverflowLinkInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,6 +24,9 @@ public class JdbcLinkRepository {
     private static final String GITHUB = "github";
     private static final String STACK_OVERFLOW = "stackoverflow";
     private static final String LINK_NOT_FOUND = "User %d don't track link %s";
+    private static final String SQL_UPDATE_LINK_TIME_NOW =
+        "UPDATE links SET last_check = NOW()::timestamp WHERE id = ?";
+    private static final String LAST_UPDATE = "last_update";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -35,31 +35,33 @@ public class JdbcLinkRepository {
     }
 
     @Transactional
-    public void addLink(Long userId, Link link) {
-        Long linkId = insertLinkIntoTables(link.getUrl());
+    public void addLink(Long userId, LinkInfo linkInfo, String linkType) {
+        Long linkId = insertLinkIntoTables(linkInfo, linkType);
 
         if (isLinkNotTrackedByUser(userId, linkId)) {
             addUserTrackedLink(userId, linkId);
         } else {
             throw new AttemptAddLinkOneMoreTimeException(
-                "User with ID " + userId + "already tracking link " + link.getUrl());
+                "User with ID " + userId + " already tracking link " + linkInfo.getLink().getUrl());
         }
-        link.setId(linkId);
+        linkInfo.getLink().setId(linkId);
     }
 
-    private Long insertLinkIntoTables(URI url) {
-        String linkType = parseLinkType(url);
+    private Long insertLinkIntoTables(LinkInfo linkInfo, String linkType) {
         Long linkId;
 
         linkId = jdbcTemplate.queryForObject(
-            "INSERT INTO links(url, link_type) VALUES (?, ?::link_type_enum) "
+            "INSERT INTO links(url, link_type, last_check) VALUES (?, ?::link_type_enum, NOW()::timestamp)"
                 + "ON CONFLICT (url) DO UPDATE SET link_type = EXCLUDED.link_type RETURNING id",
             Long.class,
-            url.toString(),
+            linkInfo.getLink().getUrl().toString().toLowerCase(),
             linkType
         );
-        addLinkToSpecificTable(Objects.requireNonNull(linkId), linkType);
-
+        switch (linkType) {
+            case GITHUB -> addGithubLinkToSpecificTable(linkId, linkInfo);
+            case STACK_OVERFLOW -> addStackoverflowLinkToSpecificTable(linkId, linkInfo);
+            default -> throw new RuntimeException("Unexpected link type");
+        }
         return linkId;
     }
 
@@ -67,7 +69,7 @@ public class JdbcLinkRepository {
     @Transactional
     public Link removeLinkByURL(Long userId, URI url) {
 
-        Long linkId = getLinkIdByUrl(url.toString());
+        Long linkId = getLinkIdByUrl(url.toString().toLowerCase());
         if (linkId == null) {
             throw new LinkNotFoundException(LINK_NOT_FOUND.formatted(userId, url));
         }
@@ -100,36 +102,51 @@ public class JdbcLinkRepository {
     }
 
     @Transactional
-    public LinkInfo updateLink(LinkInfo linkInfo) {
-        String sql = "UPDATE links SET last_check = NOW()::timestamp WHERE id = ?";
+    public LinkInfo updateGithubLink(GithubLinkInfo linkInfo) {
         Link link = linkInfo.getLink();
-        jdbcTemplate.update(sql, link.getId());
-        String linkType = parseLinkType(link.getUrl());
+        jdbcTemplate.update(SQL_UPDATE_LINK_TIME_NOW, link.getId());
 
-        LinkInfo oldInfo;
-        if (linkInfo instanceof GithubLinkInfo) {
-            String getSql = "SELECT last_update, pull_requests_count FROM github_links WHERE link_id = ? FOR UPDATE";
-            oldInfo = jdbcTemplate.queryForObject(getSql, (rs, rowNum) -> {
-                Optional<OffsetDateTime> lastUpdate = Optional.ofNullable(rs.getObject("last_update", OffsetDateTime.class));
-                Integer pullRequestsCount = rs.getInt("pull_requests_count");
-                return new GithubLinkInfo(link, lastUpdate, pullRequestsCount);
-            });
+        String getSql = "SELECT last_update, last_push, pull_requests_count "
+            + "FROM github_links WHERE link_id = ? FOR UPDATE";
+        LinkInfo oldInfo = jdbcTemplate.queryForObject(getSql, (rs, rowNum) -> {
+            OffsetDateTime lastUpdate = rs.getObject(LAST_UPDATE, OffsetDateTime.class);
+            OffsetDateTime lastPush = rs.getObject("last_push", OffsetDateTime.class);
+            Integer pullRequestsCount = rs.getInt("pull_requests_count");
+            return new GithubLinkInfo(link, lastUpdate, lastPush, pullRequestsCount);
+        }, link.getId());
 
-            String setSql = "UPDATE github_links SET last_update = ?, pull_requests_count = ? WHERE link_id = ?";
-            jdbcTemplate.update(setSql, linkInfo.getUpdateTime(), ((GithubLinkInfo) linkInfo).getPullRequestsCount(), link.getId());
-        } else if (linkInfo instanceof StackoverflowLinkInfo) {
-            String getSql = "SELECT last_update, answers_count FROM github_links WHERE link_id = ? FOR UPDATE";
-            oldInfo = jdbcTemplate.queryForObject(getSql, (rs, rowNum) -> {
-                Optional<OffsetDateTime> lastUpdate = Optional.ofNullable(rs.getObject("last_update", OffsetDateTime.class));
-                Integer answersCount = rs.getInt("answers_count");
-                return new StackoverflowLinkInfo(link, lastUpdate, answersCount);
-            });
+        String setSql = "UPDATE github_links "
+            + "SET last_update = ?, last_push = ?, pull_requests_count = ? WHERE link_id = ?";
+        jdbcTemplate.update(
+            setSql,
+            linkInfo.getUpdateTime(),
+            linkInfo.getPushTime(),
+            linkInfo.getPullRequestsCount(),
+            link.getId()
+        );
 
-            String setSql = "UPDATE stackoverflow_links SET last_update = ?, answers_count = ? WHERE link_id = ?";
-            jdbcTemplate.update(setSql, linkInfo.getUpdateTime(), ((StackoverflowLinkInfo) linkInfo).getAnswersCount(), link.getId());
-        } else {
-            throw new RuntimeException("cho za tip");
-        }
+        return oldInfo;
+    }
+
+    @Transactional
+    public LinkInfo updateStackoverflowLink(StackoverflowLinkInfo linkInfo) {
+        Link link = linkInfo.getLink();
+        jdbcTemplate.update(SQL_UPDATE_LINK_TIME_NOW, link.getId());
+
+        String getSql = "SELECT last_update, answers_count FROM stackoverflow_links WHERE link_id = ? FOR UPDATE";
+        LinkInfo oldInfo = jdbcTemplate.queryForObject(getSql, (rs, rowNum) -> {
+            OffsetDateTime lastUpdate = rs.getObject(LAST_UPDATE, OffsetDateTime.class);
+            Integer answersCount = rs.getInt("answers_count");
+            return new StackoverflowLinkInfo(link, lastUpdate, answersCount);
+        }, link.getId());
+
+        String setSql = "UPDATE stackoverflow_links SET last_update = ?, answers_count = ? WHERE link_id = ?";
+        jdbcTemplate.update(
+            setSql,
+            linkInfo.getUpdateTime(),
+            linkInfo.getAnswersCount(),
+            link.getId()
+        );
 
         return oldInfo;
     }
@@ -142,9 +159,27 @@ public class JdbcLinkRepository {
         }
     }
 
-    private void addLinkToSpecificTable(long linkId, String linkType) {
-        String sql = "INSERT INTO %s_links (link_id) VALUES (?) ON CONFLICT DO NOTHING".formatted(linkType);
-        jdbcTemplate.update(sql, linkId);
+    private void addGithubLinkToSpecificTable(Long linkId, LinkInfo linkInfo) {
+        String sql = "INSERT INTO github_links (link_id, last_update, last_push, pull_requests_count)"
+            + " VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING";
+        jdbcTemplate.update(
+            sql,
+            linkId,
+            ((GithubLinkInfo) linkInfo).getUpdateTime(),
+            ((GithubLinkInfo) linkInfo).getPushTime(),
+            ((GithubLinkInfo) linkInfo).getPullRequestsCount()
+        );
+    }
+
+    private void addStackoverflowLinkToSpecificTable(Long linkId, LinkInfo linkInfo) {
+        String sql = "INSERT INTO stackoverflow_links (link_id, last_update, answers_count) "
+            + "VALUES (?, ?, ?) ON CONFLICT DO NOTHING";
+        jdbcTemplate.update(
+            sql,
+            linkId,
+            ((StackoverflowLinkInfo) linkInfo).getUpdateTime(),
+            ((StackoverflowLinkInfo) linkInfo).getAnswersCount()
+        );
     }
 
     private boolean isLinkNotTrackedByUser(long userId, long linkId) {
@@ -178,18 +213,6 @@ public class JdbcLinkRepository {
 
         String deleteAllLinksSql = "DELETE FROM links WHERE id = ?";
         jdbcTemplate.update(deleteAllLinksSql, linkId);
-    }
-
-    private static String parseLinkType(URI url) {
-        String link = url.toString();
-
-        if (link.contains("https://github.com/")) {
-            return GITHUB;
-        }
-        if (link.contains("https://stackoverflow.com/")) {
-            return STACK_OVERFLOW;
-        }
-        return null;
     }
 
     private static final class LinkMapper implements RowMapper<Link> {

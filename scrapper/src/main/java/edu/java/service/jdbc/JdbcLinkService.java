@@ -5,7 +5,10 @@ import edu.java.domain.users.JdbcUserRepository;
 import edu.java.exception.IncorrectRequestParametersException;
 import edu.java.exception.IncorrectUserStatusException;
 import edu.java.exception.UserIdNotFoundException;
+import edu.java.models.GithubLinkInfo;
 import edu.java.models.Link;
+import edu.java.models.LinkInfo;
+import edu.java.models.StackoverflowLinkInfo;
 import edu.java.models.User;
 import edu.java.service.LinkService;
 import edu.java.service.update_checker.UpdateChecker;
@@ -15,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -36,30 +38,33 @@ public class JdbcLinkService implements LinkService {
     }
 
     @Override
-    @Transactional
     public Link addLink(Long chatId, URI url) {
-        updateLinkChangingUser(chatId, User.Status.TRACK_LINK);
+        User user = checkUserAbility(chatId, User.Status.TRACK_LINK);
+        resetUserStatusToBase(user);
 
         Link link = new Link(null, url);
+        LinkInfo linkInfo;
 
         for (UpdateChecker checker : updateCheckerList) {
             if (checker.isAppropriateLink(link)) {
                 try {
-                    checker.checkUpdates(link);
+                    linkInfo = checker.checkUpdates(link);
                 } catch (RuntimeException e) {
                     throw new IncorrectRequestParametersException("Incorrect link, please try again");
+                } finally {
+                    resetUserStatusToBase(user);
                 }
+                linkRepository.addLink(chatId, linkInfo, checker.getType());
             }
         }
-
-        linkRepository.addLink(chatId, link);
         return link;
     }
 
     @Override
     @Transactional
     public Link removeLinkByURL(Long chatId, URI url) {
-        updateLinkChangingUser(chatId, User.Status.UNTRACK_LINK);
+        User user = checkUserAbility(chatId, User.Status.UNTRACK_LINK);
+        resetUserStatusToBase(user);
         return linkRepository.removeLinkByURL(chatId, url);
     }
 
@@ -73,17 +78,25 @@ public class JdbcLinkService implements LinkService {
         return linkRepository.findAllLinksWithCheckInterval(interval);
     }
 
-    @Transactional
-    protected void updateLinkChangingUser(Long chatId, User.Status expectedStatus) {
+    @Override
+    public LinkInfo updateGithubLink(GithubLinkInfo linkInfo) {
+        return linkRepository.updateGithubLink(linkInfo);
+    }
+
+    @Override
+    public LinkInfo updateStackoverflowLink(StackoverflowLinkInfo linkInfo) {
+        return linkRepository.updateStackoverflowLink(linkInfo);
+    }
+
+    protected User checkUserAbility(Long chatId, User.Status expectedStatus) {
         User user = findUser(chatId);
         User.Status prevStatus = user.getStatus();
-        resetUserStatusToBase(user);
         if (prevStatus != expectedStatus) {
             throw new IncorrectUserStatusException(chatId);
         }
+        return user;
     }
 
-    @Transactional(propagation = Propagation.NESTED)
     protected void resetUserStatusToBase(User user) {
         user.setStatus(User.Status.BASE);
         userRepository.updateUser(user);

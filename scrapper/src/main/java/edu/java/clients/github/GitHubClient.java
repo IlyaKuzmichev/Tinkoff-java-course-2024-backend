@@ -1,7 +1,7 @@
 package edu.java.clients.github;
 
-import edu.java.clients.github.dto.GitHubRepositoryResponse;
 import edu.java.clients.github.dto.GitHubPullRequestsResponse;
+import edu.java.clients.github.dto.GitHubRepositoryResponse;
 import reactor.core.publisher.Mono;
 
 public interface GitHubClient {

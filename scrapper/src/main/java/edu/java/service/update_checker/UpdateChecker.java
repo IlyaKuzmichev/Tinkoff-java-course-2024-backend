@@ -1,11 +1,13 @@
 package edu.java.service.update_checker;
 
 import edu.java.models.Link;
-import java.util.Optional;
+import edu.java.models.LinkInfo;
 
 public interface UpdateChecker {
 
-    Optional<String> checkUpdates(Link link);
+    LinkInfo checkUpdates(Link link);
 
     boolean isAppropriateLink(Link link);
+
+    String getType();
 }
