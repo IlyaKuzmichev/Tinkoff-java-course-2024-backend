@@ -24,18 +24,18 @@ CREATE TABLE IF NOT EXISTS users
 --changeset wilmerno:create_table_links
 CREATE TABLE IF NOT EXISTS links
 (
-    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    id         BIGSERIAL PRIMARY KEY,
     link_type link_type_enum NOT NULL,
     url VARCHAR UNIQUE NOT NULL,
-    last_check TIMESTAMPTZ
+    last_check TIMESTAMP WITH TIME ZONE
 );
 
 --changeset wilmerno:create_table_github
 CREATE TABLE IF NOT EXISTS github_links
 (
     link_id BIGINT PRIMARY KEY REFERENCES links(id) ON DELETE CASCADE,
-    last_update TIMESTAMPTZ,
-    last_push TIMESTAMPTZ,
+    last_update TIMESTAMP WITH TIME ZONE,
+    last_push   TIMESTAMP WITH TIME ZONE,
     pull_requests_count INTEGER NOT NULL DEFAULT 0
 );
 
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS github_links
 CREATE TABLE IF NOT EXISTS stackoverflow_links
 (
     link_id BIGINT PRIMARY KEY REFERENCES links(id) ON DELETE CASCADE,
-    last_update TIMESTAMPTZ,
+    last_update TIMESTAMP WITH TIME ZONE,
     answers_count INTEGER NOT NULL DEFAULT 0
 );
 
