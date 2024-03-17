@@ -1,7 +1,7 @@
 package edu.java.domain;
 
 import edu.java.exception.AttemptDoubleRegistrationException;
-import edu.java.domain.users.JdbcUserRepository;
+import edu.java.domain.jdbc.JdbcUserRepository;
 import edu.java.exception.UserIdNotFoundException;
 import edu.java.models.User;
 import edu.java.scrapper.IntegrationEnvironment;

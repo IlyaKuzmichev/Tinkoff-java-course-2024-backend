@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public final class LinkUpdaterScheduler {
-    static int counter = 1;
     private final Duration checkInterval;
     private final LinkService linkService;
     private final List<UpdateManager> updateManagerList;
@@ -33,9 +32,6 @@ public final class LinkUpdaterScheduler {
 
     @Scheduled(fixedDelayString = "#{@scheduler.invokeInterval().toMillis()}")
     public void update() {
-        log.info("Scheduled method update number: " + counter);
-        counter++;
-
         Collection<Link> links = linkService.findLinksForUpdate(checkInterval.getSeconds());
         for (UpdateManager updateManager : updateManagerList) {
             updateManager.execute(links);

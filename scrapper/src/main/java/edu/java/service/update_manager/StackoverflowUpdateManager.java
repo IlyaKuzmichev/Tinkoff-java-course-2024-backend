@@ -32,7 +32,8 @@ public class StackoverflowUpdateManager implements UpdateManager {
         for (Link link : links) {
             if (stackoverflowUpdateChecker.isAppropriateLink(link)) {
                 StackoverflowLinkInfo linkInfo = stackoverflowUpdateChecker.checkUpdates(link);
-                StackoverflowLinkInfo oldInfo = (StackoverflowLinkInfo) linkService.updateStackoverflowLink(linkInfo);
+                StackoverflowLinkInfo oldInfo =
+                    (StackoverflowLinkInfo) linkService.updateStackoverflowLink(linkInfo);
                 Optional<String> answer = prepareResponseMessage(linkInfo, oldInfo);
                 answer.ifPresent(s -> botClient.sendUpdates(
                     link.getId(),

@@ -1,6 +1,6 @@
 package edu.java.service.jdbc;
 
-import edu.java.domain.users.JdbcUserRepository;
+import edu.java.domain.jdbc.JdbcUserRepository;
 import edu.java.exception.UserIdNotFoundException;
 import edu.java.models.Link;
 import edu.java.models.User;

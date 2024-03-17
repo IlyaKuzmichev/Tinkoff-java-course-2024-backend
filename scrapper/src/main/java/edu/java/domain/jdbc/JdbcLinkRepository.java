@@ -1,4 +1,4 @@
-package edu.java.domain.links;
+package edu.java.domain.jdbc;
 
 import edu.java.exception.AttemptAddLinkOneMoreTimeException;
 import edu.java.exception.LinkNotFoundException;
@@ -81,20 +81,20 @@ public class JdbcLinkRepository {
     }
 
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Link> findAllLinks() {
         String sql = "SELECT id, url FROM links";
         return jdbcTemplate.query(sql, new LinkMapper());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Link> findAllLinksForUser(Long userId) {
         String sql = "SELECT id, url FROM links INNER JOIN"
             + " user_tracked_links ON id = link_id WHERE user_id = ?";
         return jdbcTemplate.query(sql, new LinkMapper(), userId);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Link> findAllLinksWithCheckInterval(Long interval) {
         String sql = "SELECT id, url FROM links "
             + "WHERE last_check IS NULL OR EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_check)) > ?";
@@ -205,12 +205,6 @@ public class JdbcLinkRepository {
     }
 
     private void removeLinkById(long linkId) {
-        String deleteGithubLinkSql = "DELETE FROM github_links WHERE link_id = ?";
-        jdbcTemplate.update(deleteGithubLinkSql, linkId);
-
-        String deleteStackOverflowLinkSql = "DELETE FROM stackoverflow_links WHERE link_id = ?";
-        jdbcTemplate.update(deleteStackOverflowLinkSql, linkId);
-
         String deleteAllLinksSql = "DELETE FROM links WHERE id = ?";
         jdbcTemplate.update(deleteAllLinksSql, linkId);
     }

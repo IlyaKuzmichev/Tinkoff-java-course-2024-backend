@@ -1,7 +1,7 @@
 package edu.java.service.jdbc;
 
-import edu.java.domain.links.JdbcLinkRepository;
-import edu.java.domain.users.JdbcUserRepository;
+import edu.java.domain.jdbc.JdbcLinkRepository;
+import edu.java.domain.jdbc.JdbcUserRepository;
 import edu.java.exception.IncorrectRequestParametersException;
 import edu.java.exception.IncorrectUserStatusException;
 import edu.java.exception.UserIdNotFoundException;
@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class JdbcLinkService implements LinkService {
@@ -61,7 +60,6 @@ public class JdbcLinkService implements LinkService {
     }
 
     @Override
-    @Transactional
     public Link removeLinkByURL(Long chatId, URI url) {
         User user = checkUserAbility(chatId, User.Status.UNTRACK_LINK);
         resetUserStatusToBase(user);

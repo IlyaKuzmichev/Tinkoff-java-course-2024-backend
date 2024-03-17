@@ -1,4 +1,4 @@
-package edu.java.domain.users;
+package edu.java.domain.jdbc;
 
 import edu.java.domain.mappers.UserStatusMapper;
 import edu.java.exception.AttemptDoubleRegistrationException;
@@ -39,6 +39,7 @@ public class JdbcUserRepository {
         }
     }
 
+    @Transactional
     public void updateUser(User user) {
         String sql = "UPDATE users SET user_status = ?::user_status_enum WHERE id = ?";
         int affected = jdbcTemplate.update(
@@ -60,6 +61,7 @@ public class JdbcUserRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     public Optional<User> findUser(Long userId) {
         String sql = "SELECT id, user_status FROM users WHERE id = ?";
         Optional<User> user;

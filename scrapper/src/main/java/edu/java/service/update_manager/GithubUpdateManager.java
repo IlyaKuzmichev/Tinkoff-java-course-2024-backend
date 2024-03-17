@@ -8,9 +8,11 @@ import edu.java.service.UserService;
 import edu.java.service.update_checker.GithubUpdateChecker;
 import java.util.Collection;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class GithubUpdateManager implements UpdateManager {
     private final GithubUpdateChecker gitHubUpdateChecker;
     private final LinkService linkService;
@@ -31,15 +33,19 @@ public class GithubUpdateManager implements UpdateManager {
     public void execute(Collection<Link> links) {
         for (Link link : links) {
             if (gitHubUpdateChecker.isAppropriateLink(link)) {
-                GithubLinkInfo linkInfo = gitHubUpdateChecker.checkUpdates(link);
-                GithubLinkInfo oldInfo = (GithubLinkInfo) linkService.updateGithubLink(linkInfo);
-                Optional<String> answer = prepareResponseMessage(linkInfo, oldInfo);
-                answer.ifPresent(s -> botClient.sendUpdates(
-                    link.getId(),
-                    link.getUrl(),
-                    s,
-                    userService.getUsersTrackLink(link)
-                ).block());
+                try {
+                    GithubLinkInfo linkInfo = gitHubUpdateChecker.checkUpdates(link);
+                    GithubLinkInfo oldInfo = (GithubLinkInfo) linkService.updateGithubLink(linkInfo);
+                    Optional<String> answer = prepareResponseMessage(linkInfo, oldInfo);
+                    answer.ifPresent(s -> botClient.sendUpdates(
+                        link.getId(),
+                        link.getUrl(),
+                        s,
+                        userService.getUsersTrackLink(link)
+                    ).block());
+                } catch (RuntimeException e) {
+                    log.debug(e.getMessage());
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 package edu.java.domain;
 
-import edu.java.domain.links.JdbcLinkRepository;
-import edu.java.domain.users.JdbcUserRepository;
+import edu.java.domain.jdbc.JdbcLinkRepository;
+import edu.java.domain.jdbc.JdbcUserRepository;
 import edu.java.models.GithubLinkInfo;
 import edu.java.models.Link;
 import edu.java.models.LinkInfo;
