@@ -1,9 +1,8 @@
-package edu.java.service.jdbc;
+package edu.java.service.jooq;
 
-import edu.java.domain.jdbc.JdbcLinkRepository;
-import edu.java.domain.jdbc.JdbcUserRepository;
+import edu.java.domain.jooq.JooqLinkRepository;
+import edu.java.domain.jooq.JooqUserRepository;
 import edu.java.exception.IncorrectRequestParametersException;
-import edu.java.exception.IncorrectUserStatusException;
 import edu.java.exception.UserIdNotFoundException;
 import edu.java.models.GithubLinkInfo;
 import edu.java.models.Link;
@@ -20,17 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class JdbcLinkService implements LinkService {
-    private final JdbcLinkRepository linkRepository;
-    private final JdbcUserRepository userRepository;
+public class JooqLinkService implements LinkService {
+    private final JooqLinkRepository linkRepository;
+    private final JooqUserRepository userRepository;
     private final List<UpdateChecker> updateCheckerList;
 
     @Autowired
-    public JdbcLinkService(
-        JdbcLinkRepository linkRepository,
-        JdbcUserRepository userRepository,
-        List<UpdateChecker> updateCheckerList
-    ) {
+    public JooqLinkService(JooqLinkRepository linkRepository,
+        JooqUserRepository userRepository, List<UpdateChecker> updateCheckerList) {
         this.linkRepository = linkRepository;
         this.userRepository = userRepository;
         this.updateCheckerList = updateCheckerList;
@@ -38,21 +34,18 @@ public class JdbcLinkService implements LinkService {
 
     @Override
     public Link addLink(Long chatId, URI url) {
-        User user = checkUserAbility(chatId, User.Status.TRACK_LINK);
-        resetUserStatusToBase(user);
+        checkUserAndResetStatus(chatId);
 
+        LinkInfo linkInfo;
         Link link = new Link(null, url);
-
         for (UpdateChecker checker : updateCheckerList) {
             if (checker.isAppropriateLink(link)) {
                 try {
-                    LinkInfo linkInfo = checker.checkUpdates(link);
-                    linkRepository.addLink(chatId, linkInfo, checker.getType());
+                    linkInfo = checker.checkUpdates(link);
                 } catch (RuntimeException e) {
                     throw new IncorrectRequestParametersException("Incorrect link, please try again");
-                } finally {
-                    resetUserStatusToBase(user);
                 }
+                linkRepository.addLink(chatId, linkInfo, checker.getType());
             }
         }
         return link;
@@ -60,13 +53,13 @@ public class JdbcLinkService implements LinkService {
 
     @Override
     public Link removeLinkByURL(Long chatId, URI url) {
-        User user = checkUserAbility(chatId, User.Status.UNTRACK_LINK);
-        resetUserStatusToBase(user);
+        checkUserAndResetStatus(chatId);
         return linkRepository.removeLinkByURL(chatId, url);
     }
 
     @Override
     public Collection<Link> findAllLinksForUser(Long chatId) {
+        checkUserAndResetStatus(chatId);
         return linkRepository.findAllLinksForUser(chatId);
     }
 
@@ -85,25 +78,13 @@ public class JdbcLinkService implements LinkService {
         return linkRepository.updateStackoverflowLink(linkInfo);
     }
 
-    private User checkUserAbility(Long chatId, User.Status expectedStatus) {
-        User user = findUser(chatId);
-        User.Status prevStatus = user.getStatus();
-        if (prevStatus != expectedStatus) {
-            throw new IncorrectUserStatusException(chatId);
-        }
-        return user;
-    }
-
-    private void resetUserStatusToBase(User user) {
-        user.setStatus(User.Status.BASE);
-        userRepository.updateUser(user);
-    }
-
-    private User findUser(Long userId) {
-        Optional<User> user = userRepository.findUser(userId);
-        if (user.isEmpty()) {
+    private void checkUserAndResetStatus(Long userId) {
+        Optional<User> optUser = userRepository.findUser(userId);
+        if (optUser.isEmpty()) {
             throw new UserIdNotFoundException(userId);
         }
-        return user.get();
+        User user = optUser.get();
+        user.setStatus(User.Status.BASE);
+        userRepository.updateUser(user);
     }
 }

@@ -12,6 +12,7 @@ import edu.java.models.StackoverflowLinkInfo;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -129,7 +130,7 @@ public class JooqLinkRepository {
             .where(GITHUB_LINKS.LINK_ID.eq(link.getId()))
             .execute();
 
-        OffsetDateTime lastUpdate = oldInfo.getLastUpdate();
+        OffsetDateTime lastUpdate = Objects.requireNonNull(oldInfo).getLastUpdate();
         OffsetDateTime lastPush = oldInfo.getLastPush();
         Integer pullRequestsCount = oldInfo.getPullRequestsCount();
         return new GithubLinkInfo(link, lastUpdate, lastPush, pullRequestsCount);
@@ -155,7 +156,7 @@ public class JooqLinkRepository {
             .where(STACKOVERFLOW_LINKS.LINK_ID.eq(link.getId()))
             .execute();
 
-        OffsetDateTime lastUpdate = oldInfo.getLastUpdate();
+        OffsetDateTime lastUpdate = Objects.requireNonNull(oldInfo).getLastUpdate();
         Integer answersCount = oldInfo.getAnswersCount();
         return new StackoverflowLinkInfo(link, lastUpdate, answersCount);
     }

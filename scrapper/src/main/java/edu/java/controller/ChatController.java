@@ -3,7 +3,7 @@ package edu.java.controller;
 import edu.java.controller.dto.GetStatusResponse;
 import edu.java.controller.dto.SetStatusRequest;
 import edu.java.models.User;
-import edu.java.service.UserService;
+import edu.java.service.jdbc.JdbcUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/tg-chat")
 public class ChatController {
-    private final UserService userService;
+    private final JdbcUserService userService;
 
     @Autowired
-    public ChatController(UserService userService) {
+    public ChatController(JdbcUserService userService) {
         this.userService = userService;
     }
 

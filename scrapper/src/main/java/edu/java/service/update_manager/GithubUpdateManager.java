@@ -3,8 +3,8 @@ package edu.java.service.update_manager;
 import edu.java.clients.bot.BotClient;
 import edu.java.models.GithubLinkInfo;
 import edu.java.models.Link;
-import edu.java.service.LinkService;
-import edu.java.service.UserService;
+import edu.java.service.jdbc.JdbcLinkService;
+import edu.java.service.jdbc.JdbcUserService;
 import edu.java.service.update_checker.GithubUpdateChecker;
 import java.util.Collection;
 import java.util.Optional;
@@ -15,13 +15,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class GithubUpdateManager implements UpdateManager {
     private final GithubUpdateChecker gitHubUpdateChecker;
-    private final LinkService linkService;
-    private final UserService userService;
+    private final JdbcLinkService linkService;
+    private final JdbcUserService userService;
     private final BotClient botClient;
 
     public GithubUpdateManager(
         GithubUpdateChecker gitHubUpdateChecker,
-        LinkService linkService, UserService userService, BotClient botClient
+        JdbcLinkService linkService, JdbcUserService userService, BotClient botClient
     ) {
         this.gitHubUpdateChecker = gitHubUpdateChecker;
         this.linkService = linkService;

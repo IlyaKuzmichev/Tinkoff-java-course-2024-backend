@@ -1,7 +1,7 @@
 package edu.java.scheduler;
 
 import edu.java.models.Link;
-import edu.java.service.LinkService;
+import edu.java.service.jdbc.JdbcLinkService;
 import edu.java.service.update_manager.UpdateManager;
 import java.time.Duration;
 import java.util.Collection;
@@ -16,13 +16,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public final class LinkUpdaterScheduler {
     private final Duration checkInterval;
-    private final LinkService linkService;
+    private final JdbcLinkService linkService;
     private final List<UpdateManager> updateManagerList;
 
     @Autowired
     public LinkUpdaterScheduler(
         @Value("#{@scheduler.checkInterval()}") Duration checkInterval,
-        LinkService linkService,
+        JdbcLinkService linkService,
         List<UpdateManager> updateManagerList
     ) {
         this.checkInterval = checkInterval;
