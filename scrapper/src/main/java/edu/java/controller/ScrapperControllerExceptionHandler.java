@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice(basePackages = {"edu.java.controller"})
-public class ControllerExceptionHandler {
+public class ScrapperControllerExceptionHandler {
     @ExceptionHandler(IncorrectRequestParametersException.class)
     public ResponseEntity<ApiErrorResponse> handleIncorrectRequestParametersException(
         IncorrectRequestParametersException ex) {

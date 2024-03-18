@@ -1,6 +1,8 @@
-package edu.java.bot.controller.exception;
+package edu.java.bot.controller;
 
 import edu.java.bot.controller.dto.ApiErrorResponse;
+import edu.java.bot.exception.ChatIdNotFoundException;
+import edu.java.bot.exception.IncorrectRequestParametersException;
 import java.util.Arrays;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice(basePackages = {"edu.java.bot.controller"})
-public class ControllerExceptionHandler {
+public class BotControllerExceptionHandler {
     @ExceptionHandler(IncorrectRequestParametersException.class)
     public ResponseEntity<ApiErrorResponse> handleIncorrectRequestParametersException(
         IncorrectRequestParametersException ex) {

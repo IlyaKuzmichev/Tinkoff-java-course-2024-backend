@@ -1,4 +1,4 @@
-package edu.java.bot.controller.exception;
+package edu.java.bot.exception;
 
 /**
  * Exception class for API (Incorrect request parameters)
