@@ -1,6 +1,6 @@
 package edu.java.domain;
 
-import edu.java.domain.jdbc.JdbcUserRepository;
+import edu.java.domain.jooq.JooqUserRepository;
 import edu.java.exception.AttemptDoubleRegistrationException;
 import edu.java.exception.UserIdNotFoundException;
 import edu.java.models.User;
@@ -17,16 +17,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-public class JdbcUserRepositoryTest extends IntegrationEnvironment {
-
+public class JooqUserRepositoryTest extends IntegrationEnvironment {
     @Autowired
-    private JdbcUserRepository userRepository;
+    private JooqUserRepository userRepository;
 
     @Test
     @Transactional
     @Rollback
     void testAddUser() {
-        User user = new User(123456789L, User.Status.BASE);
+        User user = new User(123L, User.Status.BASE);
         userRepository.addUser(user);
 
         List<User> users = userRepository.findAllUsers();
@@ -38,7 +37,7 @@ public class JdbcUserRepositoryTest extends IntegrationEnvironment {
     @Transactional
     @Rollback
     public void testRemoveUser() {
-        User user = new User(13L, User.Status.BASE);
+        User user = new User(456L, User.Status.BASE);
         userRepository.addUser(user);
         userRepository.removeUser(user.getUserId());
 
@@ -50,7 +49,7 @@ public class JdbcUserRepositoryTest extends IntegrationEnvironment {
     @Transactional
     @Rollback
     public void testAddUserAlreadyExists() {
-        User user = new User(111111111L, null);
+        User user = new User(5L, null);
         userRepository.addUser(user);
 
         assertThrows(AttemptDoubleRegistrationException.class, () -> userRepository.addUser(user));
@@ -59,8 +58,15 @@ public class JdbcUserRepositoryTest extends IntegrationEnvironment {
     @Test
     @Transactional
     @Rollback
+    public void testRemoveNonExistingUser() {
+        assertThrows(UserIdNotFoundException.class, () -> userRepository.removeUser(999999999L));
+    }
+
+    @Test
+    @Transactional
+    @Rollback
     public void testFindUserByUserId() {
-        Long userId = 1L;
+        Long userId = 1984L;
         User user = new User(userId, User.Status.BASE);
         userRepository.addUser(user);
 
@@ -93,13 +99,6 @@ public class JdbcUserRepositoryTest extends IntegrationEnvironment {
         User user = new User(userId, User.Status.UNTRACK_LINK);
 
         assertThrows(UserIdNotFoundException.class, () -> userRepository.updateUser(user));
-    }
-
-    @Test
-    @Transactional
-    @Rollback
-    public void testRemoveNonExistingUser() {
-        assertThrows(UserIdNotFoundException.class, () -> userRepository.removeUser(999999999L));
     }
 
     @Test

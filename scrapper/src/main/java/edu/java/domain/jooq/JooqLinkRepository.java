@@ -1,5 +1,6 @@
 package edu.java.domain.jooq;
 
+import edu.java.domain.jooq.enums.LinkTypeEnum;
 import edu.java.domain.jooq.tables.records.GithubLinksRecord;
 import edu.java.domain.jooq.tables.records.LinksRecord;
 import edu.java.domain.jooq.tables.records.StackoverflowLinksRecord;
@@ -17,6 +18,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import static edu.java.domain.jooq.Tables.GITHUB_LINKS;
@@ -36,7 +38,8 @@ public class JooqLinkRepository {
 
     @Transactional
     public void addLink(Long userId, LinkInfo linkInfo, String linkType) {
-        LinksRecord linksRecord = addLinkRecord(linkInfo.getLink().getUrl());
+        LinksRecord linksRecord = addLinkRecord(linkInfo.getLink().getUrl(), linkType);
+        linkInfo.getLink().setId(linksRecord.getId());
 
         switch (linkType.toLowerCase()) {
             case "github":
@@ -161,12 +164,15 @@ public class JooqLinkRepository {
         return new StackoverflowLinkInfo(link, lastUpdate, answersCount);
     }
 
-    private LinksRecord addLinkRecord(URI url) {
+    private LinksRecord addLinkRecord(URI url, String linkType) {
         return dslContext.insertInto(LINKS)
-            .set(LINKS.URL, url.toString())
+            .set(LINKS.URL, url.toString().toLowerCase())
+            .set(LINKS.LINK_TYPE, LinkTypeEnum.lookupLiteral(linkType))
             .set(LINKS.LAST_CHECK, OffsetDateTime.now())
-            .onDuplicateKeyIgnore()
-            .returning(LINKS.ID)
+            .onConflict(LINKS.URL)
+            .doUpdate()
+            .set(LINKS.LINK_TYPE, LINKS.LINK_TYPE)
+            .returning()
             .fetchOne();
     }
 
@@ -190,12 +196,12 @@ public class JooqLinkRepository {
     }
 
     private void addUserTrackedLink(Long userId, Long linkId) {
-        int rowsAffected = dslContext.insertInto(USER_TRACKED_LINKS)
-            .set(USER_TRACKED_LINKS.USER_ID, userId)
-            .set(USER_TRACKED_LINKS.LINK_ID, linkId)
-            .onDuplicateKeyIgnore()
-            .execute();
-        if (rowsAffected == 0) {
+        try {
+            dslContext.insertInto(USER_TRACKED_LINKS)
+                .set(USER_TRACKED_LINKS.USER_ID, userId)
+                .set(USER_TRACKED_LINKS.LINK_ID, linkId)
+                .execute();
+        } catch (DuplicateKeyException e) {
             throw new AttemptAddLinkOneMoreTimeException("You already tracking this link");
         }
     }
@@ -206,12 +212,12 @@ public class JooqLinkRepository {
 
     private void clearDBFromUntrackedLink(Long linkId) {
         if (!isLinkTracked(linkId)) {
-            dslContext.deleteFrom(GITHUB_LINKS)
-                .where(LINKS.ID.eq(linkId))
-                .execute();
-            dslContext.deleteFrom(STACKOVERFLOW_LINKS)
-                .where(LINKS.ID.eq(linkId))
-                .execute();
+//            dslContext.deleteFrom(GITHUB_LINKS)
+//                .where(GITHUB_LINKS.LINK_ID.eq(linkId))
+//                .execute();
+//            dslContext.deleteFrom(STACKOVERFLOW_LINKS)
+//                .where(STACKOVERFLOW_LINKS.LINK_ID.eq(linkId))
+//                .execute();
             dslContext.deleteFrom(LINKS)
                 .where(LINKS.ID.eq(linkId))
                 .execute();

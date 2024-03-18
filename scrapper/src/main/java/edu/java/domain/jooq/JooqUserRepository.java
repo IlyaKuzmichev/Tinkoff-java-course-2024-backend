@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +36,7 @@ public class JooqUserRepository {
                 .insertInto(Users.USERS)
                 .set(Users.USERS.ID, user.getUserId())
                 .execute();
-        } catch (DataAccessException e) {
+        } catch (DuplicateKeyException e) {
             throw new AttemptDoubleRegistrationException(
                 String.format("User with ID %d already exists", user.getUserId())
             );
