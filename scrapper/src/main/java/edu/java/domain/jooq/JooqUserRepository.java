@@ -1,9 +1,9 @@
 package edu.java.domain.jooq;
 
-import edu.java.domain.jooq.enums.UserStatusEnum;
-import edu.java.domain.jooq.tables.UserTrackedLinks;
-import edu.java.domain.jooq.tables.Users;
-import edu.java.domain.jooq.tables.records.UserTrackedLinksRecord;
+import edu.java.domain.jooqcodegen.enums.UserStatusEnum;
+import edu.java.domain.jooqcodegen.tables.UserTrackedLinks;
+import edu.java.domain.jooqcodegen.tables.Users;
+import edu.java.domain.jooqcodegen.tables.records.UserTrackedLinksRecord;
 import edu.java.domain.mappers.UserStatusMapper;
 import edu.java.exception.AttemptDoubleRegistrationException;
 import edu.java.exception.UserIdNotFoundException;

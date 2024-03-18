@@ -1,9 +1,9 @@
 package edu.java.domain.jooq;
 
-import edu.java.domain.jooq.enums.LinkTypeEnum;
-import edu.java.domain.jooq.tables.records.GithubLinksRecord;
-import edu.java.domain.jooq.tables.records.LinksRecord;
-import edu.java.domain.jooq.tables.records.StackoverflowLinksRecord;
+import edu.java.domain.jooqcodegen.enums.LinkTypeEnum;
+import edu.java.domain.jooqcodegen.tables.records.GithubLinksRecord;
+import edu.java.domain.jooqcodegen.tables.records.LinksRecord;
+import edu.java.domain.jooqcodegen.tables.records.StackoverflowLinksRecord;
 import edu.java.exception.AttemptAddLinkOneMoreTimeException;
 import edu.java.exception.LinkNotFoundException;
 import edu.java.models.GithubLinkInfo;
@@ -21,10 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import static edu.java.domain.jooq.Tables.GITHUB_LINKS;
-import static edu.java.domain.jooq.Tables.LINKS;
-import static edu.java.domain.jooq.Tables.STACKOVERFLOW_LINKS;
-import static edu.java.domain.jooq.Tables.USER_TRACKED_LINKS;
+import static edu.java.domain.jooqcodegen.Tables.GITHUB_LINKS;
+import static edu.java.domain.jooqcodegen.Tables.LINKS;
+import static edu.java.domain.jooqcodegen.Tables.STACKOVERFLOW_LINKS;
+import static edu.java.domain.jooqcodegen.Tables.USER_TRACKED_LINKS;
 
 @Repository
 public class JooqLinkRepository {
