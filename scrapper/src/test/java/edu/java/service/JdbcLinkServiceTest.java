@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestPropertySource(locations = "classpath:test", properties = "client.github.base-url=https://api.github.com")
 @TestPropertySource(locations = "classpath:test",
                     properties = "client.stackoverflow.base-url=https://api.stackexchange.com/2.3")
-//@EnabledIfEnvironmentVariable(named = "SCRAPPER_REAL_TESTS_ENABLE", matches = "1")
+@EnabledIfEnvironmentVariable(named = "SCRAPPER_REAL_TESTS_ENABLE", matches = "1")
 public class JdbcLinkServiceTest extends IntegrationEnvironment {
     @Autowired
     private JdbcUserService userService;

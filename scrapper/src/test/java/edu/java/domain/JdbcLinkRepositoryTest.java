@@ -63,7 +63,7 @@ public class JdbcLinkRepositoryTest extends IntegrationEnvironment {
     @Test
     @Transactional
     @Rollback
-    public void testAddExistingLinkTracedByAnotherUser() {
+    public void testAddExistingLinkTrackedByAnotherUser() {
         User user1 = new User(1L, User.Status.TRACK_LINK);
         User user2 = new User(2L, User.Status.TRACK_LINK);
         userRepository.addUser(user1);
