@@ -20,6 +20,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class JdbcLinkRepositoryTest extends IntegrationEnvironment {
@@ -199,13 +200,13 @@ public class JdbcLinkRepositoryTest extends IntegrationEnvironment {
 
         GithubLinkInfo newLinkInfo = new GithubLinkInfo(link, timeUpdater, timeUpdater, 2);
         GithubLinkInfo oldLinkInfo = (GithubLinkInfo) linkRepository.updateGithubLink(newLinkInfo);
-        assertEquals(initialTime, oldLinkInfo.getUpdateTime());
-        assertEquals(initialTime, oldLinkInfo.getPushTime());
+        assertTrue(initialTime.isEqual(oldLinkInfo.getUpdateTime()));
+        assertTrue(initialTime.isEqual(oldLinkInfo.getPushTime()));
         assertEquals(1, oldLinkInfo.getPullRequestsCount());
 
         GithubLinkInfo oldLinkInfo2 = (GithubLinkInfo) linkRepository.updateGithubLink(newLinkInfo);
-        assertEquals(timeUpdater, oldLinkInfo2.getUpdateTime());
-        assertEquals(timeUpdater, oldLinkInfo2.getPushTime());
+        assertTrue(timeUpdater.isEqual(oldLinkInfo2.getUpdateTime()));
+        assertTrue(timeUpdater.isEqual(oldLinkInfo2.getPushTime()));
         assertEquals(2, oldLinkInfo2.getPullRequestsCount());
     }
 
@@ -226,12 +227,12 @@ public class JdbcLinkRepositoryTest extends IntegrationEnvironment {
 
         StackoverflowLinkInfo newLinkInfo = new StackoverflowLinkInfo(link, timeUpdater, 2);
         StackoverflowLinkInfo oldLinkInfo = (StackoverflowLinkInfo) linkRepository.updateStackoverflowLink(newLinkInfo);
-        assertEquals(initialTime, oldLinkInfo.getUpdateTime());
+        assertTrue(initialTime.isEqual(oldLinkInfo.getUpdateTime()));
         assertEquals(1, oldLinkInfo.getAnswersCount());
 
         StackoverflowLinkInfo oldLinkInfo2 =
             (StackoverflowLinkInfo) linkRepository.updateStackoverflowLink(newLinkInfo);
-        assertEquals(timeUpdater, oldLinkInfo2.getUpdateTime());
+        assertTrue(timeUpdater.isEqual(oldLinkInfo2.getUpdateTime()));
         assertEquals(2, oldLinkInfo2.getAnswersCount());
     }
 
