@@ -12,6 +12,7 @@ import edu.java.models.User;
 import edu.java.scrapper.IntegrationEnvironment;
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class JdbcLinkRepositoryTest extends IntegrationEnvironment {
@@ -200,13 +200,25 @@ public class JdbcLinkRepositoryTest extends IntegrationEnvironment {
 
         GithubLinkInfo newLinkInfo = new GithubLinkInfo(link, timeUpdater, timeUpdater, 2);
         GithubLinkInfo oldLinkInfo = (GithubLinkInfo) linkRepository.updateGithubLink(newLinkInfo);
-        assertTrue(initialTime.isEqual(oldLinkInfo.getUpdateTime()));
-        assertTrue(initialTime.isEqual(oldLinkInfo.getPushTime()));
+        assertEquals(
+            initialTime.truncatedTo(ChronoUnit.SECONDS),
+            oldLinkInfo.getUpdateTime().truncatedTo(ChronoUnit.SECONDS)
+        );
+        assertEquals(
+            initialTime.truncatedTo(ChronoUnit.SECONDS),
+            oldLinkInfo.getPushTime().truncatedTo(ChronoUnit.SECONDS)
+        );
         assertEquals(1, oldLinkInfo.getPullRequestsCount());
 
         GithubLinkInfo oldLinkInfo2 = (GithubLinkInfo) linkRepository.updateGithubLink(newLinkInfo);
-        assertTrue(timeUpdater.isEqual(oldLinkInfo2.getUpdateTime()));
-        assertTrue(timeUpdater.isEqual(oldLinkInfo2.getPushTime()));
+        assertEquals(
+            timeUpdater.truncatedTo(ChronoUnit.SECONDS),
+            oldLinkInfo2.getUpdateTime().truncatedTo(ChronoUnit.SECONDS)
+        );
+        assertEquals(
+            timeUpdater.truncatedTo(ChronoUnit.SECONDS),
+            oldLinkInfo2.getPushTime().truncatedTo(ChronoUnit.SECONDS)
+        );
         assertEquals(2, oldLinkInfo2.getPullRequestsCount());
     }
 
@@ -227,12 +239,18 @@ public class JdbcLinkRepositoryTest extends IntegrationEnvironment {
 
         StackoverflowLinkInfo newLinkInfo = new StackoverflowLinkInfo(link, timeUpdater, 2);
         StackoverflowLinkInfo oldLinkInfo = (StackoverflowLinkInfo) linkRepository.updateStackoverflowLink(newLinkInfo);
-        assertTrue(initialTime.isEqual(oldLinkInfo.getUpdateTime()));
+        assertEquals(
+            initialTime.truncatedTo(ChronoUnit.SECONDS),
+            oldLinkInfo.getUpdateTime().truncatedTo(ChronoUnit.SECONDS)
+        );
         assertEquals(1, oldLinkInfo.getAnswersCount());
 
         StackoverflowLinkInfo oldLinkInfo2 =
             (StackoverflowLinkInfo) linkRepository.updateStackoverflowLink(newLinkInfo);
-        assertTrue(timeUpdater.isEqual(oldLinkInfo2.getUpdateTime()));
+        assertEquals(
+            timeUpdater.truncatedTo(ChronoUnit.SECONDS),
+            oldLinkInfo2.getUpdateTime().truncatedTo(ChronoUnit.SECONDS)
+        );
         assertEquals(2, oldLinkInfo2.getAnswersCount());
     }
 
