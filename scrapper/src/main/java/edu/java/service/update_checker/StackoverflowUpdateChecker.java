@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+//TODO Write tests
 @Service
 public class StackoverflowUpdateChecker implements UpdateChecker {
     private static final String HOST = "stackoverflow.com";

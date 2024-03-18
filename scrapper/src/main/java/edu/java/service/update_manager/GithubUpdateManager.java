@@ -11,6 +11,7 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+//TODO Write tests
 @Service
 @Slf4j
 public class GithubUpdateManager implements UpdateManager {
