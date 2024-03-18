@@ -201,7 +201,10 @@ public class JdbcLinkRepository {
 
     private void removeUserTrackedLink(long userId, long linkId) {
         String sql = "DELETE FROM user_tracked_links WHERE user_id = ? AND link_id = ?";
-        jdbcTemplate.update(sql, userId, linkId);
+        int rowsAffected = jdbcTemplate.update(sql, userId, linkId);
+        if (rowsAffected == 0) {
+            throw new LinkNotFoundException("You don't track this link!!");
+        }
     }
 
     private void removeLinkById(long linkId) {

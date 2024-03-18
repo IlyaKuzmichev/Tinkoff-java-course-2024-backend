@@ -3,7 +3,7 @@ app:
     enable: true
     invoke-interval: 5s
     force-check-delay: 10s
-    check-interval: 100s
+    check-interval: 300s
 
 client:
   github:
