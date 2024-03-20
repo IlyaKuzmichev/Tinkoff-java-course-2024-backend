@@ -4,7 +4,6 @@ import edu.java.domain.jdbc.JdbcUserRepository;
 import edu.java.exception.UserIdNotFoundException;
 import edu.java.models.User;
 import edu.java.scrapper.IntegrationEnvironment;
-import edu.java.service.jdbc.JdbcUserService;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 public class JdbcUserServiceTest extends IntegrationEnvironment {
     @Autowired
-    private JdbcUserService userService;
+    private UserService userService;
     @Autowired
     private JdbcUserRepository userRepository;
 

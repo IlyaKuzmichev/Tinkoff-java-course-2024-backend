@@ -6,8 +6,6 @@ import edu.java.models.Link;
 import edu.java.models.StackoverflowLinkInfo;
 import edu.java.models.User;
 import edu.java.scrapper.IntegrationEnvironment;
-import edu.java.service.jdbc.JdbcLinkService;
-import edu.java.service.jdbc.JdbcUserService;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.Collection;
@@ -29,9 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @EnabledIfEnvironmentVariable(named = "SCRAPPER_REAL_TESTS_ENABLE", matches = "1")
 public class JdbcLinkServiceTest extends IntegrationEnvironment {
     @Autowired
-    private JdbcUserService userService;
+    private UserService userService;
     @Autowired
-    private JdbcLinkService linkService;
+    private LinkService linkService;
     @Autowired
     private JdbcLinkRepository linkRepository;
     private static final URI GITHUB_URL = URI.create(

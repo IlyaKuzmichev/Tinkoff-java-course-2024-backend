@@ -5,7 +5,7 @@ import edu.java.controller.dto.LinkResponse;
 import edu.java.controller.dto.ListLinksResponse;
 import edu.java.controller.dto.RemoveLinkRequest;
 import edu.java.models.Link;
-import edu.java.service.jdbc.JdbcLinkService;
+import edu.java.service.LinkService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/links")
 public class LinksController {
-    private final JdbcLinkService linkService;
+    private final LinkService linkService;
 
     @Autowired
-    public LinksController(JdbcLinkService linkService) {
+    public LinksController(LinkService linkService) {
         this.linkService = linkService;
     }
 

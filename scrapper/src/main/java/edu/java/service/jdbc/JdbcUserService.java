@@ -7,14 +7,10 @@ import edu.java.models.User;
 import edu.java.service.UserService;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class JdbcUserService implements UserService {
     private final JdbcUserRepository userRepository;
 
-    @Autowired
     public JdbcUserService(JdbcUserRepository userRepository) {
         this.userRepository = userRepository;
     }

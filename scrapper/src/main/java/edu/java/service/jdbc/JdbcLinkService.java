@@ -16,16 +16,12 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class JdbcLinkService implements LinkService {
     private final JdbcLinkRepository linkRepository;
     private final JdbcUserRepository userRepository;
     private final List<UpdateChecker> updateCheckerList;
 
-    @Autowired
     public JdbcLinkService(
         JdbcLinkRepository linkRepository,
         JdbcUserRepository userRepository,

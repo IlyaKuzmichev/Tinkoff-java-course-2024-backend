@@ -3,8 +3,8 @@ package edu.java.service.update_manager;
 import edu.java.clients.bot.BotClient;
 import edu.java.models.Link;
 import edu.java.models.StackoverflowLinkInfo;
-import edu.java.service.jdbc.JdbcLinkService;
-import edu.java.service.jdbc.JdbcUserService;
+import edu.java.service.LinkService;
+import edu.java.service.UserService;
 import edu.java.service.update_checker.StackoverflowUpdateChecker;
 import java.util.Collection;
 import java.util.Optional;
@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class StackoverflowUpdateManager implements UpdateManager {
     private final StackoverflowUpdateChecker stackoverflowUpdateChecker;
-    private final JdbcLinkService linkService;
-    private final JdbcUserService userService;
+    private final LinkService linkService;
+    private final UserService userService;
     private final BotClient botClient;
 
     public StackoverflowUpdateManager(
         StackoverflowUpdateChecker stackoverflowUpdateChecker,
-        JdbcLinkService linkService, JdbcUserService userService, BotClient botClient
+        LinkService linkService, UserService userService, BotClient botClient
     ) {
         this.stackoverflowUpdateChecker = stackoverflowUpdateChecker;
         this.linkService = linkService;

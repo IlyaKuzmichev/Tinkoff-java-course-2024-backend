@@ -8,12 +8,13 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "app", ignoreUnknownFields = false)
+
 public record ApplicationConfig(
-    @Bean
-    @NotNull
-    Scheduler scheduler
+    @Bean @NotNull Scheduler scheduler,
+    @NotNull AccessType databaseAccessType
 ) {
     public record Scheduler(boolean enable, @NotNull Duration invokeInterval,
                             @NotNull Duration forceCheckDelay, @NotNull Duration checkInterval) {
     }
 }
+

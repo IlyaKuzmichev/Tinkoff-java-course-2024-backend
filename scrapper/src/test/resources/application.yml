@@ -4,6 +4,7 @@ app:
     invoke-interval: 5s
     force-check-delay: 10s
     check-interval: 1000s
+  database-access-type: jdbc
 
 client:
   github:

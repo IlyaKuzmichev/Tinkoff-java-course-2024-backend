@@ -7,14 +7,10 @@ import edu.java.models.User;
 import edu.java.service.UserService;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class JooqUserService implements UserService {
     private final JooqUserRepository userRepository;
 
-    @Autowired
     public JooqUserService(JooqUserRepository userRepository) {
         this.userRepository = userRepository;
     }

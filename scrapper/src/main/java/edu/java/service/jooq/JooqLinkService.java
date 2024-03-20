@@ -15,16 +15,12 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class JooqLinkService implements LinkService {
     private final JooqLinkRepository linkRepository;
     private final JooqUserRepository userRepository;
     private final List<UpdateChecker> updateCheckerList;
 
-    @Autowired
     public JooqLinkService(JooqLinkRepository linkRepository,
         JooqUserRepository userRepository, List<UpdateChecker> updateCheckerList) {
         this.linkRepository = linkRepository;
