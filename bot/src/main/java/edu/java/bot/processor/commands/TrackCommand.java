@@ -1,8 +1,9 @@
 package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
-import edu.java.bot.database.UserRegistry;
-import edu.java.bot.database.UserState;
+import edu.java.bot.clients.scrapper.ScrapperClient;
+import edu.java.bot.clients.scrapper.dto.UserStatus;
+import edu.java.bot.clients.scrapper.exception.CustomClientException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -11,12 +12,11 @@ import org.springframework.stereotype.Component;
 public final class TrackCommand implements Command {
     private static final String NAME = "/track";
     private static final String DESCRIPTION = "Add new link for tracking";
-    private static final String NO_REGISTRATION = "You need to be registered for tracking links";
     private static final String LINK_INVITATION = "Input the link for tracking";
-    UserRegistry userRegistry;
+    ScrapperClient scrapperClient;
 
-    public TrackCommand(UserRegistry userRegistry) {
-        this.userRegistry = userRegistry;
+    public TrackCommand(ScrapperClient scrapperClient) {
+        this.scrapperClient = scrapperClient;
     }
 
     @Override
@@ -31,11 +31,12 @@ public final class TrackCommand implements Command {
 
     @Override
     public String execute(Update update) {
-        var userId = update.message().chat().id();
-        if (userRegistry.getUser(userId).isEmpty()) {
-            return NO_REGISTRATION;
+        var chatId = update.message().chat().id();
+        try {
+            scrapperClient.setUserStatus(chatId, UserStatus.TRACK_LINK).block();
+        } catch (CustomClientException e) {
+            return e.getClientErrorResponse().exceptionMessage();
         }
-        userRegistry.getUser(userId).get().setState(UserState.WAIT_TRACK_URI);
         return LINK_INVITATION;
     }
 }

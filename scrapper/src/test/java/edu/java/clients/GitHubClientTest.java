@@ -52,11 +52,32 @@ public class GitHubClientTest {
 
         StepVerifier.create(gitHubClient.fetchRepository(ownerName, repositoryName))
             .expectNextMatches(response -> {
-                OffsetDateTime expectedDate = OffsetDateTime.parse("2022-02-01T00:00:00Z", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                OffsetDateTime expectedUpdateDate = OffsetDateTime.parse("2022-02-01T00:00:00Z", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                OffsetDateTime expectedPushedDate = OffsetDateTime.parse("2022-03-01T00:00:00Z", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                 return response.fullName().equals("https://github.com/testOwner/testRepo") &&
-                    response.updatedAt().isEqual(expectedDate);
+                    response.updatedAt().isEqual(expectedUpdateDate) &&
+                    response.pushedAt().isEqual(expectedPushedDate);
             })
             .verifyComplete();
+    }
+
+    @Test
+    public void testFetchPullRequests() {
+        String repositoryName = "testRepo";
+        String ownerName = "testOwner";
+        Integer pushCount = 6;
+        String responseBody = "{\"total_count\": %d,\"incomplete_results\": false}".formatted(pushCount);
+
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/search/issues?q=repo:%s/%s+type:pr".formatted(ownerName, repositoryName)))
+            .willReturn(WireMock.aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBody(responseBody)));
+
+        StepVerifier.create(gitHubClient.fetchPullRequests(ownerName, repositoryName))
+            .expectNextMatches(response -> response.pullRequestsCount().equals(pushCount))
+            .verifyComplete();
+
     }
 
     @Test

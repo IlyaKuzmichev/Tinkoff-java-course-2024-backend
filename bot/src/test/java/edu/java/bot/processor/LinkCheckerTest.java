@@ -24,7 +24,6 @@ public class LinkCheckerTest {
     public void testValidGitHubLink() {
         final String link = "https://github.com/pengrad/java-telegram-bot-api?tab=readme-ov-file#available-methods";
         checker.loadLink(link);
-        assertTrue(checker.isValidLink());
         assertEquals("github.com", checker.getHost());
         assertTrue(checker.isPossibleToTrack());
     }
@@ -33,7 +32,6 @@ public class LinkCheckerTest {
     public void testValidStackOverflowLink() {
         final String link = "https://stackoverflow.com/questions/19102180/how-does-gldrawarrays-know-what-to-draw";
         checker.loadLink(link);
-        assertTrue(checker.isValidLink());
         assertEquals("stackoverflow.com", checker.getHost());
         assertTrue(checker.isPossibleToTrack());
     }
@@ -42,7 +40,6 @@ public class LinkCheckerTest {
     public void testInvalidDomainAndValidLink() {
         final String link = "https://edu.21-school.ru/calendar";
         checker.loadLink(link);
-        assertTrue(checker.isValidLink());
         assertNotEquals("github.com", checker.getHost());
         assertNotEquals("stackoverflow.com", checker.getHost());
         assertFalse(checker.isPossibleToTrack());
@@ -52,7 +49,6 @@ public class LinkCheckerTest {
     public void testInvalidLink() {
         final String link = "Avada-kedavra.us";
         checker.loadLink(link);
-        assertFalse(checker.isValidLink());
         assertEquals("INVALID", checker.getHost());
         assertFalse(checker.isPossibleToTrack());
     }

@@ -1,8 +1,10 @@
 app:
   scheduler:
     enable: true
-    interval: 5s
+    invoke-interval: 5s
     force-check-delay: 10s
+    check-interval: 300s
+  database-access-type: jdbc
 
 client:
   github:
@@ -13,9 +15,12 @@ client:
     base-url: http://localhost:8090
 
 spring:
+  liquibase:
+    enabled: false
   application:
     name: scrapper
   datasource:
+    driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/scrapper
     username: postgres
     password: postgres

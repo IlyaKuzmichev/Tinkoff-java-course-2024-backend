@@ -1,8 +1,9 @@
 package edu.java.bot.processor.commands;
 
 import com.pengrad.telegrambot.model.Update;
-import edu.java.bot.database.UserRegistry;
-import edu.java.bot.database.UserState;
+import edu.java.bot.clients.scrapper.ScrapperClient;
+import edu.java.bot.clients.scrapper.dto.UserStatus;
+import edu.java.bot.clients.scrapper.exception.CustomClientException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -11,13 +12,11 @@ import org.springframework.stereotype.Component;
 public final class UntrackCommand implements Command {
     private static final String NAME = "/untrack";
     private static final String DESCRIPTION = "Untrack one of your links";
-    private static final String NO_REGISTRATION = "You need to be registered for tracking links";
-    private static final String EMPTY_LINK_LIST = "You have no tracking links";
     private static final String LINK_INVITATION = "Input link for untracking";
-    UserRegistry userRegistry;
+    ScrapperClient scrapperClient;
 
-    public UntrackCommand(UserRegistry userRegistry) {
-        this.userRegistry = userRegistry;
+    public UntrackCommand(ScrapperClient scrapperClient) {
+        this.scrapperClient = scrapperClient;
     }
 
     @Override
@@ -32,14 +31,12 @@ public final class UntrackCommand implements Command {
 
     @Override
     public String execute(Update update) {
-        var user = userRegistry.getUser(update.message().chat().id());
-        if (user.isEmpty()) {
-            return NO_REGISTRATION;
+        var chatId = update.message().chat().id();
+        try {
+            scrapperClient.setUserStatus(chatId, UserStatus.UNTRACK_LINK).block();
+        } catch (CustomClientException e) {
+            return e.getClientErrorResponse().exceptionMessage();
         }
-        if (user.get().getLinks().isEmpty()) {
-            return EMPTY_LINK_LIST;
-        }
-        user.get().setState(UserState.WAIT_UNTRACK_URI);
         return LINK_INVITATION;
     }
 }

@@ -1,44 +1,56 @@
 --liquibase formatted sql
 
---changeset wilmerno:id1
+
+--changeset wilmerno:create_user_status_enum
+CREATE TYPE user_status_enum AS ENUM (
+    'base',
+    'track_link',
+    'untrack_link'
+    );
+
+--changeset wilmerno:create_link_type_enum
+CREATE TYPE link_type_enum AS ENUM (
+    'github',
+    'stackoverflow'
+    );
+
+--changeset wilmerno:create_table_users
 CREATE TABLE IF NOT EXISTS users
 (
-    user_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    chat_id BIGINT UNIQUE NOT NULL
+    id BIGINT UNIQUE NOT NULL,
+    user_status user_status_enum NOT NULL DEFAULT 'base'
 );
 
---changeset wilmerno:id2
-CREATE TABLE IF NOT EXISTS all_links
+--changeset wilmerno:create_table_links
+CREATE TABLE IF NOT EXISTS links
 (
-    link_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    link_type VARCHAR(20) NOT NULL CHECK (link_type IN ('github', 'stackoverflow')),
-    url VARCHAR UNIQUE NOT NULL
+    id         BIGSERIAL PRIMARY KEY,
+    link_type link_type_enum NOT NULL,
+    url VARCHAR UNIQUE NOT NULL,
+    last_check TIMESTAMP WITH TIME ZONE
 );
 
---changeset wilmerno:id3
+--changeset wilmerno:create_table_github
 CREATE TABLE IF NOT EXISTS github_links
 (
-    link_id BIGINT PRIMARY KEY REFERENCES all_links(link_id),
-    last_update TIMESTAMP
-    -- another parameters for tracking TODO
+    link_id BIGINT PRIMARY KEY REFERENCES links(id) ON DELETE CASCADE,
+    last_update TIMESTAMP WITH TIME ZONE NOT NULL,
+    last_push   TIMESTAMP WITH TIME ZONE NOT NULL,
+    pull_requests_count INTEGER NOT NULL DEFAULT 0
 );
 
---changeset wilmerno:id4
+--changeset wilmerno:create_table_stackoverflow
 CREATE TABLE IF NOT EXISTS stackoverflow_links
 (
-    link_id BIGINT PRIMARY KEY REFERENCES all_links(link_id),
-    last_update TIMESTAMP
-    -- another parameters for tracking TODO
+    link_id BIGINT PRIMARY KEY REFERENCES links(id) ON DELETE CASCADE,
+    last_update TIMESTAMP WITH TIME ZONE NOT NULL,
+    answers_count INTEGER NOT NULL DEFAULT 0
 );
 
---changeset wilmerno:id5
+--changeset wilmerno:create_table_user_tracked_links
 CREATE TABLE IF NOT EXISTS user_tracked_links
 (
-    user_id BIGINT REFERENCES users(user_id),
-    link_id BIGINT REFERENCES all_links(link_id),
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    link_id BIGINT REFERENCES links(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, link_id)
 );
-
---changeset wilmerno:for_testing
-INSERT INTO users(chat_id)
-VALUES (123), (456), (789);
