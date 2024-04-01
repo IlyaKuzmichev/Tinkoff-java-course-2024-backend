@@ -79,14 +79,12 @@ public class JooqLinkRepository {
         return new Link(linkId, url);
     }
 
-    @Transactional(readOnly = true)
     public List<Link> findAllLinks() {
         return dslContext.selectFrom(LINKS)
             .fetch()
             .map(rec -> new Link(rec.getId(), URI.create(rec.getUrl())));
     }
 
-    @Transactional(readOnly = true)
     public List<Link> findAllLinksForUser(Long userId) {
         return dslContext.select(LINKS.ID, LINKS.URL)
             .from(LINKS)
@@ -96,8 +94,7 @@ public class JooqLinkRepository {
             .map(rec -> new Link(rec.get(LINKS.ID), URI.create(rec.get(LINKS.URL))));
     }
 
-    @Transactional(readOnly = true)
-    public List<Link> findAllLinksWithCheckInterval(Long interval) {
+    public List<Link> findAllLinksWithCheckIntervalInSeconds(Long interval) {
         OffsetDateTime threshold = OffsetDateTime.now().minusSeconds(interval);
 
         Result<Record> result = dslContext.select()
@@ -212,12 +209,6 @@ public class JooqLinkRepository {
 
     private void clearDBFromUntrackedLink(Long linkId) {
         if (!isLinkTracked(linkId)) {
-//            dslContext.deleteFrom(GITHUB_LINKS)
-//                .where(GITHUB_LINKS.LINK_ID.eq(linkId))
-//                .execute();
-//            dslContext.deleteFrom(STACKOVERFLOW_LINKS)
-//                .where(STACKOVERFLOW_LINKS.LINK_ID.eq(linkId))
-//                .execute();
             dslContext.deleteFrom(LINKS)
                 .where(LINKS.ID.eq(linkId))
                 .execute();

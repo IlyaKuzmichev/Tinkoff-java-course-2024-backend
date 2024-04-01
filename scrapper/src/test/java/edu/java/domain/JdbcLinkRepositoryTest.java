@@ -139,7 +139,7 @@ public class JdbcLinkRepositoryTest extends IntegrationEnvironment {
         LinkInfo linkInfo = new GithubLinkInfo(link, OffsetDateTime.now(), OffsetDateTime.now(), 1);
         linkRepository.addLink(user.getUserId(), linkInfo, "github");
 
-        List<Link> links = linkRepository.findAllLinksWithCheckInterval(-1L);
+        List<Link> links = linkRepository.findAllLinksWithCheckIntervalInSeconds(-1L);
         assertEquals(1, links.size());
         assertEquals(link.getUrl().toString().toLowerCase(), links.getFirst().getUrl().toString());
     }

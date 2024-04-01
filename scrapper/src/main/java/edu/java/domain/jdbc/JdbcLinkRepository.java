@@ -80,22 +80,18 @@ public class JdbcLinkRepository {
         return new Link(linkId, url);
     }
 
-
-    @Transactional(readOnly = true)
     public List<Link> findAllLinks() {
         String sql = "SELECT id, url FROM links";
         return jdbcTemplate.query(sql, new LinkMapper());
     }
 
-    @Transactional(readOnly = true)
     public List<Link> findAllLinksForUser(Long userId) {
         String sql = "SELECT id, url FROM links INNER JOIN"
             + " user_tracked_links ON id = link_id WHERE user_id = ?";
         return jdbcTemplate.query(sql, new LinkMapper(), userId);
     }
 
-    @Transactional(readOnly = true)
-    public List<Link> findAllLinksWithCheckInterval(Long interval) {
+    public List<Link> findAllLinksWithCheckIntervalInSeconds(Long interval) {
         String sql = "SELECT id, url FROM links "
             + "WHERE last_check IS NULL OR EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_check)) > ?";
         return jdbcTemplate.query(sql, new LinkMapper(), interval);

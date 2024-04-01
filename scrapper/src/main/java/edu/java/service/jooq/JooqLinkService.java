@@ -61,7 +61,7 @@ public class JooqLinkService implements LinkService {
 
     @Override
     public Collection<Link> findLinksForUpdate(Long interval) {
-        return linkRepository.findAllLinksWithCheckInterval(interval);
+        return linkRepository.findAllLinksWithCheckIntervalInSeconds(interval);
     }
 
     @Override

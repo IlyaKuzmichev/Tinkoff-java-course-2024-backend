@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
-//TODO Write tests
 @Service
 public class StackoverflowUpdateManager implements UpdateManager {
     private final StackoverflowUpdateChecker stackoverflowUpdateChecker;
