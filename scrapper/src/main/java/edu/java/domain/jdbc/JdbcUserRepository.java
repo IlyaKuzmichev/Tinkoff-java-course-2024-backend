@@ -15,7 +15,6 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class JdbcUserRepository {
@@ -27,7 +26,6 @@ public class JdbcUserRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Transactional
     public void addUser(User user) {
         String sql = "INSERT INTO users(id) VALUES (?)";
         try {
@@ -39,7 +37,6 @@ public class JdbcUserRepository {
         }
     }
 
-    @Transactional
     public void updateUser(User user) {
         String sql = "UPDATE users SET user_status = ?::user_status_enum WHERE id = ?";
         int affected = jdbcTemplate.update(
@@ -52,7 +49,6 @@ public class JdbcUserRepository {
         }
     }
 
-    @Transactional
     public void removeUser(Long userId) {
         String sql = "DELETE FROM users WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, userId);
@@ -61,7 +57,6 @@ public class JdbcUserRepository {
         }
     }
 
-    @Transactional(readOnly = true)
     public Optional<User> findUser(Long userId) {
         String sql = "SELECT id, user_status FROM users WHERE id = ?";
         Optional<User> user;
@@ -73,13 +68,11 @@ public class JdbcUserRepository {
         return user;
     }
 
-    @Transactional(readOnly = true)
     public List<User> findAllUsers() {
         String sql = "SELECT id, user_status FROM users";
         return jdbcTemplate.query(sql, new UserMapper());
     }
 
-    @Transactional(readOnly = true)
     public List<Long> findUsersTrackLink(Link link) {
         String sql = "SELECT user_id FROM user_tracked_links WHERE link_id = ?";
         return jdbcTemplate.query(sql, (resultSet, rowNum) ->

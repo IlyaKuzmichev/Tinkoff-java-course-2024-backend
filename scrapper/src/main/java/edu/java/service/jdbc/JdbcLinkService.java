@@ -20,16 +20,16 @@ import java.util.Optional;
 public class JdbcLinkService implements LinkService {
     private final JdbcLinkRepository linkRepository;
     private final JdbcUserRepository userRepository;
-    private final List<UpdateChecker> updateCheckerList;
+    private final List<UpdateChecker> updateCheckers;
 
     public JdbcLinkService(
         JdbcLinkRepository linkRepository,
         JdbcUserRepository userRepository,
-        List<UpdateChecker> updateCheckerList
+        List<UpdateChecker> updateCheckers
     ) {
         this.linkRepository = linkRepository;
         this.userRepository = userRepository;
-        this.updateCheckerList = updateCheckerList;
+        this.updateCheckers = updateCheckers;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class JdbcLinkService implements LinkService {
 
         Link link = new Link(null, url);
 
-        for (UpdateChecker checker : updateCheckerList) {
+        for (UpdateChecker checker : updateCheckers) {
             if (checker.isAppropriateLink(link)) {
                 try {
                     LinkInfo linkInfo = checker.checkUpdates(link);
