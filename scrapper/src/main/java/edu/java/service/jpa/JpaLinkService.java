@@ -29,6 +29,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,7 +77,7 @@ public class JpaLinkService implements LinkService {
 
         var optLink = linkRepository.findByUrlIgnoreCase(url.toString());
         if (optLink.isEmpty()) {
-            throw new LinkNotFoundException("Link is not tracked by the service");
+            throw new LinkNotFoundException("Link is not tracking by the service");
         }
         Links link = optLink.get();
 
@@ -94,7 +95,12 @@ public class JpaLinkService implements LinkService {
 
     @Override
     public Collection<Link> findAllLinksForUser(Long chatId) {
-        return userTrackedLinkRepository.findAllByUserId(chatId)
+        Optional<Users> user = userRepository.findUsersById(chatId);
+        if (user.isEmpty()) {
+            throw new UserIdNotFoundException(chatId);
+        }
+        return user.get()
+            .getTrackedLinks()
             .stream()
             .map(UserTrackedLinks::getLink)
             .map(link -> new Link(link.getId(), URI.create(link.getUrl())))

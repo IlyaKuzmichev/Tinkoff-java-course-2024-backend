@@ -73,7 +73,7 @@ public class JpaUserService implements UserService {
     }
 
     private Users checkUserExistence(Long userId) {
-        var optUser = userRepository.findById(userId);
+        var optUser = userRepository.findUsersById(userId);
         if (optUser.isEmpty()) {
             throw new UserIdNotFoundException(userId);
         }
