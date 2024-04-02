@@ -4,7 +4,7 @@ app:
     invoke-interval: 5s
     force-check-delay: 10s
     check-interval: 300s
-  database-access-type: jdbc
+  database-access-type: jpa
 
 client:
   github:
@@ -21,9 +21,13 @@ spring:
     name: scrapper
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/scrapper
+    url: jdbc:postgresql://localhost:5432/scrapper?stringtype=unspecified
     username: postgres
     password: postgres
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
 
 springdoc:
   swagger-ui:

@@ -1,6 +1,7 @@
 package edu.java.domain.jpa.entities;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,12 +25,12 @@ public class Links {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "link_type", nullable = false)
     private String linkType;
 
     @Column(name = "url", unique = true, nullable = false)
-    private URI url;
+//    @Convert(converter = URIConverter.class)
+    private String url;
 
     @Column(name = "last_check")
     private OffsetDateTime lastCheck;

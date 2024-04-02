@@ -11,6 +11,8 @@ import edu.java.domain.jpa.entities.StackoverflowLinks;
 import edu.java.domain.jpa.entities.UserTrackedLinks;
 import edu.java.domain.jpa.entities.UserTrackedLinksPK;
 import edu.java.domain.jpa.entities.Users;
+import edu.java.domain.mappers.GithubLinkInfoMapper;
+import edu.java.domain.mappers.StackoverflowLinkInfoMapper;
 import edu.java.exception.AttemptAddLinkOneMoreTimeException;
 import edu.java.exception.IncorrectRequestParametersException;
 import edu.java.exception.IncorrectUserStatusException;
@@ -29,6 +31,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 public class JpaLinkService implements LinkService {
@@ -40,13 +43,14 @@ public class JpaLinkService implements LinkService {
     private final List<UpdateChecker> updateCheckers;
 
     @Override
+    @Transactional
     public Link addLink(Long chatId, URI url) {
         Users user = checkUserAbility(chatId, User.Status.TRACK_LINK);
         user.setUserStatus(User.Status.BASE);
         userRepository.saveAndFlush(user);
 
         Link link = new Link(
-            linkRepository.findByUrl(url)
+            linkRepository.findByUrlIgnoreCase(url.toString())
             .map(Links::getId)
             .orElse(null),
             url);
@@ -60,19 +64,16 @@ public class JpaLinkService implements LinkService {
         }
         UserTrackedLinks subscription = new UserTrackedLinks();
         subscription.setId(new UserTrackedLinksPK(chatId, link.getId()));
-        userTrackedLinkRepository.saveAndFlush(subscription);
+        userTrackedLinkRepository.save(subscription);
         return link;
     }
 
+    @Transactional
     @Override
     public Link removeLinkByURL(Long chatId, URI url) {
-        var optUser = userRepository.findById(chatId);
-        if (optUser.isEmpty()) {
-            throw new UserIdNotFoundException(chatId);
-        }
-        Users user = optUser.get();
+        Users user = checkUserAbility(chatId, User.Status.UNTRACK_LINK);
 
-        var optLink = linkRepository.findByUrl(url);
+        var optLink = linkRepository.findByUrlIgnoreCase(url.toString());
         if (optLink.isEmpty()) {
             throw  new LinkNotFoundException("Link is not tracked by the service");
         }
@@ -84,11 +85,10 @@ public class JpaLinkService implements LinkService {
             throw new LinkNotFoundException("You don't track this link");
         }
         userTrackedLinkRepository.deleteByUserAndLink(user, link);
-        userTrackedLinkRepository.flush();
         if (userTrackedLinkRepository.findAllByLinkId(link.getId()).isEmpty()) {
             linkRepository.deleteById(link.getId());
         }
-        return new Link(link.getId(), link.getUrl());
+        return new Link(link.getId(), URI.create(link.getUrl()));
     }
 
     @Override
@@ -96,23 +96,37 @@ public class JpaLinkService implements LinkService {
         return userTrackedLinkRepository.findAllByUserId(chatId)
             .stream()
             .map(UserTrackedLinks::getLink)
-            .map(link -> new Link(link.getId(), link.getUrl()))
+            .map(link -> new Link(link.getId(), URI.create(link.getUrl())))
             .collect(Collectors.toList());
     }
 
     @Override
     public Collection<Link> findLinksForUpdate(Long interval) {
-        return null;
+        return linkRepository.findLinksByLastCheckBefore(OffsetDateTime.now().minusSeconds(interval))
+            .stream()
+            .map(link -> new Link(link.getId(), URI.create(link.getUrl())))
+            .collect(Collectors.toList());
+
     }
 
     @Override
+    @Transactional
     public LinkInfo updateGithubLink(GithubLinkInfo linkInfo) {
-        return null;
+        var linkEntity = githubLinkRepository.findGithubLinksById(linkInfo.getLink().getId());
+        GithubLinkInfo oldLinkInfo = GithubLinkInfoMapper.entityToLinkInfo(linkEntity);
+        GithubLinkInfoMapper.linkInfoToEntity(linkInfo, linkEntity);
+        githubLinkRepository.save(linkEntity);
+        return oldLinkInfo;
     }
 
     @Override
+    @Transactional
     public LinkInfo updateStackoverflowLink(StackoverflowLinkInfo linkInfo) {
-        return null;
+        var linkEntity = stackoverflowLinkRepository.findStackoverflowLinksById(linkInfo.getLink().getId());
+        StackoverflowLinkInfo oldLinkInfo = StackoverflowLinkInfoMapper.entityToLinkInfo(linkEntity);
+        StackoverflowLinkInfoMapper.linkInfoToEntity(linkInfo, linkEntity);
+        stackoverflowLinkRepository.save(linkEntity);
+        return oldLinkInfo;
     }
 
     private Users checkUserAbility(Long userId, User.Status status) {
@@ -134,7 +148,7 @@ public class JpaLinkService implements LinkService {
                     LinkInfo linkInfo = checker.checkUpdates(link);
                     Links jpaLink = new Links();
                     jpaLink.setLinkType(checker.getType());
-                    jpaLink.setUrl(link.getUrl());
+                    jpaLink.setUrl(link.getUrl().toString());
                     jpaLink.setLastCheck(OffsetDateTime.now());
                     link.setId(jpaLink.getId());
                     linkRepository.save(jpaLink);
@@ -147,25 +161,20 @@ public class JpaLinkService implements LinkService {
     }
 
     private void addLinkToSpecificTables(Long linkId, LinkInfo linkInfo, String linkType) {
-
         switch (linkType) {
             case "github" -> {
                 GithubLinks link = new GithubLinks();
                 link.setId(linkId);
-                link.setLastUpdate(((GithubLinkInfo) linkInfo).getUpdateTime());
-                link.setLastPush(((GithubLinkInfo) linkInfo).getPushTime());
-                link.setPullRequestsCount(((GithubLinkInfo) linkInfo).getPullRequestsCount());
+                GithubLinkInfoMapper.linkInfoToEntity((GithubLinkInfo) linkInfo, link);
                 githubLinkRepository.save(link);
             }
             case "stackoverflow" -> {
                 StackoverflowLinks link = new StackoverflowLinks();
                 link.setId(linkId);
-                link.setLastUpdate(((StackoverflowLinkInfo) linkInfo).getUpdateTime());
-                link.setAnswersCount(((StackoverflowLinkInfo) linkInfo).getAnswersCount());
+                StackoverflowLinkInfoMapper.linkInfoToEntity((StackoverflowLinkInfo) linkInfo, link);
                 stackoverflowLinkRepository.save(link);
             }
             default -> throw new IncorrectRequestParametersException("Incorrect link type");
         }
     }
-
 }

@@ -5,11 +5,16 @@ import edu.java.domain.jpa.entities.UserTrackedLinks;
 import edu.java.domain.jpa.entities.Users;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface JpaUserTrackedLinkRepository extends JpaRepository<UserTrackedLinks, Long> {
+    @EntityGraph(attributePaths = {"links"})
     List<UserTrackedLinks> findAllByUserId(Long id);
 
+    @EntityGraph(attributePaths = {"users"})
     List<UserTrackedLinks> findAllByLinkId(Long id);
 
     Optional<UserTrackedLinks> findUserTrackedLinksByUserIdAndLinkId(Long userId, Long linkId);

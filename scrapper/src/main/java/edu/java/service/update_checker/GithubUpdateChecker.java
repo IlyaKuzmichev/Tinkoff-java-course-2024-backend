@@ -8,7 +8,6 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-//TODO Write tests
 @Service
 public class GithubUpdateChecker implements UpdateChecker {
     private static final String HOST = "github.com";

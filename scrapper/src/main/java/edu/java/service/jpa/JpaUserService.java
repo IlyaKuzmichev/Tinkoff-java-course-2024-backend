@@ -36,7 +36,7 @@ public class JpaUserService implements UserService {
                 USER_EXCEPTION_FORMAT.formatted(userId, "already exists"));
         }
 
-        Users newUser = new Users(userId, null, new ArrayList<>());
+        Users newUser = new Users(userId, User.Status.BASE, new ArrayList<>());
         userRepository.saveAndFlush(newUser);
         user.setStatus(User.Status.BASE);
     }

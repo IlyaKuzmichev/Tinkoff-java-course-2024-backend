@@ -3,9 +3,8 @@ package edu.java.domain.jpa.entities;
 import edu.java.models.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -25,8 +24,8 @@ public class Users {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "user_status", nullable = false, columnDefinition = "user_status_enum DEFAULT 'base'")
+    @Convert(converter = UserStatusConverter.class)
     private User.Status userStatus;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
