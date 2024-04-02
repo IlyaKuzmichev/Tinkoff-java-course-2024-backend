@@ -10,17 +10,23 @@ import edu.java.service.UserService;
 import edu.java.service.jpa.JpaLinkService;
 import edu.java.service.jpa.JpaUserService;
 import edu.java.service.update_checker.UpdateChecker;
+import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import java.util.List;
 
 @Configuration
 @ConditionalOnProperty(prefix = "app", name = "database-access-type", havingValue = "jpa")
 public class JpaAccessConfig {
     @Bean
-    public UserService userService(JpaUserRepository userRepository, JpaUserTrackedLinkRepository userTrackedLinkRepository) {
-        return new JpaUserService(userRepository, userTrackedLinkRepository);
+    public UserService userService(
+        JpaUserRepository userRepository,
+        JpaUserTrackedLinkRepository userTrackedLinkRepository
+    ) {
+        return new JpaUserService(
+            userRepository,
+            userTrackedLinkRepository
+        );
     }
 
     @Bean

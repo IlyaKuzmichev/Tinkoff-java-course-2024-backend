@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface JpaUserTrackedLinkRepository extends JpaRepository<UserTrackedLinks, Long> {
-    @EntityGraph(attributePaths = {"links"})
+    @EntityGraph(attributePaths = {"link"})
     List<UserTrackedLinks> findAllByUserId(Long id);
 
-    @EntityGraph(attributePaths = {"users"})
+    @EntityGraph(attributePaths = {"user"})
     List<UserTrackedLinks> findAllByLinkId(Long id);
 
     Optional<UserTrackedLinks> findUserTrackedLinksByUserIdAndLinkId(Long userId, Long linkId);

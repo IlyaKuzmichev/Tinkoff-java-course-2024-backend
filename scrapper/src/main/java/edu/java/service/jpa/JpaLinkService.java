@@ -51,9 +51,10 @@ public class JpaLinkService implements LinkService {
 
         Link link = new Link(
             linkRepository.findByUrlIgnoreCase(url.toString())
-            .map(Links::getId)
-            .orElse(null),
-            url);
+                .map(Links::getId)
+                .orElse(null),
+            url
+        );
 
         if (link.getId() == null) {
             addLinkToTables(link);
@@ -75,7 +76,7 @@ public class JpaLinkService implements LinkService {
 
         var optLink = linkRepository.findByUrlIgnoreCase(url.toString());
         if (optLink.isEmpty()) {
-            throw  new LinkNotFoundException("Link is not tracked by the service");
+            throw new LinkNotFoundException("Link is not tracked by the service");
         }
         Links link = optLink.get();
 
@@ -112,7 +113,10 @@ public class JpaLinkService implements LinkService {
     @Override
     @Transactional
     public LinkInfo updateGithubLink(GithubLinkInfo linkInfo) {
-        var linkEntity = githubLinkRepository.findGithubLinksById(linkInfo.getLink().getId());
+        Long linkId = linkInfo.getLink().getId();
+        resetLinkUpdateTime(linkId);
+
+        var linkEntity = githubLinkRepository.findGithubLinksById(linkId);
         GithubLinkInfo oldLinkInfo = GithubLinkInfoMapper.entityToLinkInfo(linkEntity);
         GithubLinkInfoMapper.linkInfoToEntity(linkInfo, linkEntity);
         githubLinkRepository.save(linkEntity);
@@ -122,7 +126,10 @@ public class JpaLinkService implements LinkService {
     @Override
     @Transactional
     public LinkInfo updateStackoverflowLink(StackoverflowLinkInfo linkInfo) {
-        var linkEntity = stackoverflowLinkRepository.findStackoverflowLinksById(linkInfo.getLink().getId());
+        Long linkId = linkInfo.getLink().getId();
+        resetLinkUpdateTime(linkId);
+
+        var linkEntity = stackoverflowLinkRepository.findStackoverflowLinksById(linkId);
         StackoverflowLinkInfo oldLinkInfo = StackoverflowLinkInfoMapper.entityToLinkInfo(linkEntity);
         StackoverflowLinkInfoMapper.linkInfoToEntity(linkInfo, linkEntity);
         stackoverflowLinkRepository.save(linkEntity);
@@ -150,9 +157,10 @@ public class JpaLinkService implements LinkService {
                     jpaLink.setLinkType(checker.getType());
                     jpaLink.setUrl(link.getUrl().toString());
                     jpaLink.setLastCheck(OffsetDateTime.now());
+                    linkRepository.saveAndFlush(jpaLink);
+
                     link.setId(jpaLink.getId());
-                    linkRepository.save(jpaLink);
-                    addLinkToSpecificTables(link.getId(), linkInfo, checker.getType());
+                    addLinkToSpecificTables(jpaLink, linkInfo);
                 } catch (RuntimeException e) {
                     throw new IncorrectRequestParametersException("Incorrect link");
                 }
@@ -160,21 +168,30 @@ public class JpaLinkService implements LinkService {
         }
     }
 
-    private void addLinkToSpecificTables(Long linkId, LinkInfo linkInfo, String linkType) {
-        switch (linkType) {
+    private void addLinkToSpecificTables(Links link, LinkInfo linkInfo) {
+        switch (link.getLinkType()) {
             case "github" -> {
-                GithubLinks link = new GithubLinks();
-                link.setId(linkId);
-                GithubLinkInfoMapper.linkInfoToEntity((GithubLinkInfo) linkInfo, link);
-                githubLinkRepository.save(link);
+                GithubLinks specLink = new GithubLinks();
+                specLink.setLink(link);
+                GithubLinkInfoMapper.linkInfoToEntity((GithubLinkInfo) linkInfo, specLink);
+                githubLinkRepository.save(specLink);
             }
             case "stackoverflow" -> {
-                StackoverflowLinks link = new StackoverflowLinks();
-                link.setId(linkId);
-                StackoverflowLinkInfoMapper.linkInfoToEntity((StackoverflowLinkInfo) linkInfo, link);
-                stackoverflowLinkRepository.save(link);
+                StackoverflowLinks specLink = new StackoverflowLinks();
+                specLink.setLink(link);
+                StackoverflowLinkInfoMapper.linkInfoToEntity((StackoverflowLinkInfo) linkInfo, specLink);
+                stackoverflowLinkRepository.save(specLink);
             }
             default -> throw new IncorrectRequestParametersException("Incorrect link type");
+        }
+    }
+
+    private void resetLinkUpdateTime(Long linkId) {
+        var optLink = linkRepository.findById(linkId);
+        if (optLink.isPresent()) {
+            Links link = optLink.get();
+            link.setLastCheck(OffsetDateTime.now());
+            linkRepository.saveAndFlush(link);
         }
     }
 }

@@ -1,7 +1,6 @@
 package edu.java.domain.jpa;
 
 import edu.java.domain.jpa.entities.Links;
-import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
