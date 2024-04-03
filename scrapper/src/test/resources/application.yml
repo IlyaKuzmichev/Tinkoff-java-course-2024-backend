@@ -28,6 +28,8 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: 8080
