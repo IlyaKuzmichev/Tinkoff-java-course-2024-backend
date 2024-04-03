@@ -5,12 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@DirtiesContext
 @TestPropertySource(locations = "classpath:test", properties = "client.stackoverflow.base-url=https://api.stackexchange.com/2.3")
 @EnabledIfEnvironmentVariable(named = "SCRAPPER_REAL_TESTS_ENABLE", matches = "1")
 public class StackOverflowClientRealRequestTest {
