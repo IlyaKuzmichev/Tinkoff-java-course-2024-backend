@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import reactor.test.StepVerifier;
 import java.net.URI;
@@ -18,6 +19,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 @SpringBootTest
+@DirtiesContext
 @TestPropertySource(locations = "classpath:test")
 public class RestBotClientTest {
     private static final String UPDATES_ENDPOINT = "/updates";
