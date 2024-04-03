@@ -4,6 +4,9 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.clients.bot.RestBotClient;
 import edu.java.clients.exception.CustomClientException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,15 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 import reactor.test.StepVerifier;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
 
 @SpringBootTest
 @DirtiesContext
-@TestPropertySource(locations = "classpath:test")
 public class RestBotClientTest {
     private static final String UPDATES_ENDPOINT = "/updates";
     private static final String DESCRIPTION = "Description";

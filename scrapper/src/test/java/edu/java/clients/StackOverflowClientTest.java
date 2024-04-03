@@ -3,6 +3,7 @@ package edu.java.clients;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.clients.stackoverflow.StackOverflowClient;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -10,14 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.test.StepVerifier;
-import java.time.OffsetDateTime;
 
 @SpringBootTest
 @DirtiesContext
-@TestPropertySource(locations = "classpath:test")
 public class StackOverflowClientTest {
 
     private static WireMockServer wireMockServer;
