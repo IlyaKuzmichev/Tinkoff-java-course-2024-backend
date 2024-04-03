@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.clients.github.GitHubClient;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import edu.java.scrapper.IntegrationEnvironment;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ import reactor.test.StepVerifier;
 
 @SpringBootTest
 @DirtiesContext
-public class GitHubClientTest {
+public class GitHubClientTest extends IntegrationEnvironment {
 
     private static WireMockServer wireMockServer;
 

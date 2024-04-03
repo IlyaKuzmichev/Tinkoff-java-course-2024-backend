@@ -7,6 +7,7 @@ import edu.java.clients.exception.CustomClientException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import edu.java.scrapper.IntegrationEnvironment;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,7 +20,7 @@ import reactor.test.StepVerifier;
 
 @SpringBootTest
 @DirtiesContext
-public class RestBotClientTest {
+public class RestBotClientTest extends IntegrationEnvironment {
     private static final String UPDATES_ENDPOINT = "/updates";
     private static final String DESCRIPTION = "Description";
     private static final Long id = 1L;

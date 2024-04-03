@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.clients.stackoverflow.StackOverflowClient;
 import java.time.OffsetDateTime;
+import edu.java.scrapper.IntegrationEnvironment;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import reactor.test.StepVerifier;
 
 @SpringBootTest
 @DirtiesContext
-public class StackOverflowClientTest {
+public class StackOverflowClientTest extends IntegrationEnvironment {
 
     private static WireMockServer wireMockServer;
 
