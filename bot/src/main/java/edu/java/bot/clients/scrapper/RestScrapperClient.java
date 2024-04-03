@@ -9,6 +9,7 @@ import edu.java.bot.clients.scrapper.dto.RemoveLinkRequest;
 import edu.java.bot.clients.scrapper.dto.SetStatusRequest;
 import edu.java.bot.clients.scrapper.dto.UserStatus;
 import edu.java.bot.clients.scrapper.exception.CustomClientException;
+import edu.java.bot.clients.scrapper.retries.RetryFilter;
 import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,10 @@ public class RestScrapperClient implements ScrapperClient {
     private final WebClient webClient;
 
     @Autowired
-    public RestScrapperClient(WebClient.Builder webClientBuilder, @Value("${client.scrapper.base-url:http://localhost:8080}") String baseUrl) {
-        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
+    public RestScrapperClient(WebClient.Builder webClientBuilder, RetryFilter retryFilter, @Value("${client.scrapper.base-url:http://localhost:8080}") String baseUrl) {
+        this.webClient = webClientBuilder.baseUrl(baseUrl)
+            .filter(retryFilter)
+            .build();
         log.info(baseUrl);
         log.info(webClient.getClass().getName());
     }
