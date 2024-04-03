@@ -1,3 +1,7 @@
+TRUNCATE TABLE user_tracked_links CASCADE;
+TRUNCATE TABLE links RESTART IDENTITY CASCADE;
+TRUNCATE TABLE users CASCADE;
+
 INSERT INTO users (id) VALUES (101), (102), (103);
 
 INSERT INTO links (link_type, url, last_check) VALUES
@@ -8,7 +12,7 @@ INSERT INTO links (link_type, url, last_check) VALUES
 
 INSERT INTO github_links (link_id, last_update, last_push, pull_requests_count) VALUES
     (1, '2024-03-03 11:11:11.111111 +00:00', '2024-02-02 11:11:11.111111 +00:00', 1),
-    (2, '2024-02-02 11:11:11.111111 +00:00', '2024-04-04 11:11:11.111111 +00:00', 9);
+    (2, '2024-02-02 11:11:11.111111 +00:00', '2024-02-02 11:11:11.111111 +00:00', 9);
 
 INSERT INTO stackoverflow_links (link_id, last_update, answers_count) VALUES
     (3, '2024-03-03 11:11:11.111111 +00:00', 2),
