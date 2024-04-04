@@ -18,7 +18,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class JdbcUserRepository {
-    private static final String USER_EXCEPTION_FORMAT = "User with ID %d %s";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -31,9 +30,7 @@ public class JdbcUserRepository {
         try {
             jdbcTemplate.update(sql, user.getUserId());
         } catch (DataIntegrityViolationException e) {
-            throw new AttemptDoubleRegistrationException(
-                USER_EXCEPTION_FORMAT.formatted(user.getUserId(), "already exists")
-            );
+            throw new AttemptDoubleRegistrationException(user.getUserId());
         }
     }
 

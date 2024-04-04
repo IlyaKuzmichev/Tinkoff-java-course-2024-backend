@@ -24,6 +24,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DirtiesContext
 @Sql(value = "classpath:sql/insert_values_to_db.sql",
      executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@TestPropertySource(locations = "classpath:test")
 public class JpaLinkServiceTest extends IntegrationEnvironment {
     @Autowired
     private JpaLinkService linkService;

@@ -1,7 +1,9 @@
 package edu.java.exception;
 
 public class AttemptDoubleRegistrationException extends RuntimeException {
-    public AttemptDoubleRegistrationException(String message) {
-        super(message);
+    private final Long userId;
+    public AttemptDoubleRegistrationException(Long userId) {
+        super("Already registered");
+        this.userId = userId;
     }
 }
