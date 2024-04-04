@@ -30,7 +30,11 @@ public class RestScrapperClient implements ScrapperClient {
     private final WebClient webClient;
 
     @Autowired
-    public RestScrapperClient(WebClient.Builder webClientBuilder, RetryFilter retryFilter, @Value("${client.scrapper.base-url:http://localhost:8080}") String baseUrl) {
+    public RestScrapperClient(
+        WebClient.Builder webClientBuilder,
+        RetryFilter retryFilter,
+        @Value("${client.scrapper.base-url:http://localhost:8080}") String baseUrl
+    ) {
         this.webClient = webClientBuilder.baseUrl(baseUrl)
             .filter(retryFilter)
             .build();

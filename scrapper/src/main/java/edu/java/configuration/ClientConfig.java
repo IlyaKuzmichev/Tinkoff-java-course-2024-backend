@@ -12,7 +12,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class ClientConfig {
     @Bean
-    public GitHubClient gitHubClient(@Qualifier("github_web_client") WebClient gitHubWebClient) {
+    public GitHubClient gitHubClient(
+        @Qualifier("github_web_client") WebClient gitHubWebClient) {
         return new WebGitHubClient(gitHubWebClient);
     }
 

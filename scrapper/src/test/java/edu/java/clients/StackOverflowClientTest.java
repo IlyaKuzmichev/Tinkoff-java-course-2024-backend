@@ -3,10 +3,12 @@ package edu.java.clients;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.clients.stackoverflow.StackOverflowClient;
-import java.time.OffsetDateTime;
 import edu.java.scrapper.IntegrationEnvironment;
+import java.time.OffsetDateTime;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,6 +18,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.test.StepVerifier;
 
 @SpringBootTest
+@Slf4j
 @DirtiesContext
 public class StackOverflowClientTest extends IntegrationEnvironment {
 
@@ -68,5 +71,24 @@ public class StackOverflowClientTest extends IntegrationEnvironment {
             .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
                 ((WebClientResponseException) throwable).getStatusCode() == HttpStatus.BAD_REQUEST)
             .verify();
+    }
+
+    @Disabled
+    @Test
+    public void testRetriesWorkingWithExistingStatusCode() {
+        log.debug("Start of linear retry test for Stackoverflow");
+        log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
+        int questionId = 12345;
+
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/questions/" + questionId + "?site=stackoverflow"))
+            .willReturn(WireMock.aResponse()
+                .withStatus(HttpStatus.GATEWAY_TIMEOUT.value())
+                .withHeader("Content-Type", "application/json")));
+
+        StepVerifier.create(stackOverflowClient.fetchQuestion(questionId))
+            .verifyError();
+
+        log.debug("End of linear retry test for GitHub");
+        log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
     }
 }

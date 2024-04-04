@@ -22,7 +22,7 @@ logging:
   config: classpath:log4j2-plain.xml
 
 retry:
-  attempts: 5
+  attempts: 3
   status-codes: 500, 502, 503, 504
   type: linear
   backoff-config:

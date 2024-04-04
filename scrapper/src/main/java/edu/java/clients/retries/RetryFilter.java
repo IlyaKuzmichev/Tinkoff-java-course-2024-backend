@@ -1,6 +1,6 @@
-package edu.java.bot.clients.scrapper.retries;
+package edu.java.clients.retries;
 
-import edu.java.bot.clients.scrapper.retries.backoff.Backoff;
+import edu.java.clients.retries.backoff.Backoff;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Set;

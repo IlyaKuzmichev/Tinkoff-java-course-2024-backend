@@ -3,6 +3,7 @@ package edu.java.bot.clients.scrapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.bot.clients.scrapper.exception.CustomClientException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
+@Slf4j
 @TestPropertySource(locations = "classpath:test")
 public class RestScrapperClientTest {
     private static final String CHAT_ENDPOINT_PREFIX = "/tg-chat/";
