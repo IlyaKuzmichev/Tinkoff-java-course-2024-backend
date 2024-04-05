@@ -33,7 +33,7 @@ spring:
     jcache:
       provider: com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider
     caffeine:
-      spec: maximumSize=100000,expireAfterAccess=60s
+      spec: maximumSize=100000,expireAfterAccess=3600s
     cache-names:
       - rate-limit-buckets-scrapper
 
