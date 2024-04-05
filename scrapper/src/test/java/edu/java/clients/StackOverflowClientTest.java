@@ -78,19 +78,20 @@ public class StackOverflowClientTest extends IntegrationEnvironment {
     @Disabled
     @Test
     public void testRetriesWorkingWithExistingStatusCode() {
-        log.debug("Start of linear retry test for Stackoverflow");
+        log.debug("Start of retry test for Stackoverflow");
         log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
         int questionId = 12345;
 
         WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/questions/" + questionId + "?site=stackoverflow"))
             .willReturn(WireMock.aResponse()
-                .withStatus(HttpStatus.GATEWAY_TIMEOUT.value())
+                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .withHeader("Content-Type", "application/json")));
 
         StepVerifier.create(stackOverflowClient.fetchQuestion(questionId))
             .verifyError();
 
-        log.debug("End of linear retry test for GitHub");
+        WireMock.verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/questions/" + questionId + "?site=stackoverflow")));
+        log.debug("End of linear retry test for StackOverflow");
         log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
     }
 }

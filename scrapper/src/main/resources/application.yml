@@ -35,20 +35,49 @@ spring:
     caffeine:
       spec: maximumSize=100000,expireAfterAccess=60s
     cache-names:
-      - rate-limit-buckets-bot
+      - rate-limit-buckets-scrapper
 
 bucket4j:
   enabled: true
+  default-metric-tags:
+    - key: IP
+      expression: getRemoteAddr()
+      types: REJECTED_COUNTER
   filters:
-    - cache-name: rate-limit-buckets-bot
-      url: /.*
-      http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests\", \"message\": \"You have exhausted your API Request Quota\" }"
+    - id: filter-chat
+      cache-name: rate-limit-buckets-scrapper
+      url: /tg-chat/.*
+      http-content-type: application/json
+      http-status-code: TOO_MANY_REQUESTS
+      http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests\", \"message\": \"You have exhausted your API Request Quota for /tg-chat endpoint\" }"
       rate-limits:
-        - bandwidths:
-            - capacity: 100
+        - cache-key: getRemoteAddr()
+          num-tokens: 1
+          bandwidths:
+            - id: bandwidths-tg-chat
+              capacity: 100
               time: 1
               unit: minutes
               refill-speed: interval
+      metrics:
+        enabled: true
+    - id: filter-links
+      cache-name: rate-limit-buckets-scrapper
+      url: /links
+      http-content-type: application/json
+      http-status-code: TOO_MANY_REQUESTS
+      http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests\", \"message\": \"You have exhausted your API Request Quota for /links endpoint\" }"
+      rate-limits:
+        - cache-key: getRemoteAddr()
+          num-tokens: 1
+          bandwidths:
+            - id: bandwidths-links
+              capacity: 100
+              time: 1
+              unit: minutes
+              refill-speed: interval
+      metrics:
+        enabled: true
 
 springdoc:
   swagger-ui:
@@ -63,7 +92,7 @@ logging:
 retry:
   attempts: 3
   status-codes: 500, 502, 503, 504
-  type: linear
+  type: exponential
   backoff-config:
     constant:
       initial-interval: 1s

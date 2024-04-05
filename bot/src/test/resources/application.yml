@@ -14,7 +14,7 @@ spring:
     jcache:
       provider: com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider
     caffeine:
-      spec: maximumSize=100000,expireAfterAccess=60s
+      spec: maximumSize=100000,expireAfterAccess=3600s
     cache-names:
       - rate-limit-buckets-bot
 
@@ -25,8 +25,9 @@ bucket4j:
       url: /.*
       http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests\", \"message\": \"You have exhausted your API Request Quota\" }"
       rate-limits:
-        - bandwidths:
-            - capacity: 100
+        - cache-key: getRemoteAddr()
+          bandwidths:
+            - capacity: 7
               time: 1
               unit: minutes
               refill-speed: interval

@@ -105,7 +105,7 @@ public class GitHubClientTest extends IntegrationEnvironment {
     @Disabled
     @Test
     public void testRetriesWorkingWithExistingStatusCode() {
-        log.debug("Start of linear retry test for GitHub");
+        log.debug("Start of retry test for GitHub");
         log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
         String repositoryName = "Repo";
         String ownerName = "Owner";
@@ -114,6 +114,7 @@ public class GitHubClientTest extends IntegrationEnvironment {
             .willReturn(WireMock.aResponse()
                 .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+
         StepVerifier.create(gitHubClient.fetchRepository(ownerName, repositoryName))
                 .verifyError();
 
