@@ -5,6 +5,13 @@ app:
     force-check-delay: 10s
     check-interval: 300s
   database-access-type: jpa
+  use-queue: false
+  kafka-config:
+    bootstrap-servers: localhost:9091,localhost:9092,localhost:9093
+    topic-link-updates:
+      name: api.scrapper.updates
+      partitions: 3
+      replicas: 3
 
 client:
   github:
@@ -103,3 +110,5 @@ retry:
       initial-interval: 1s
       maximum-interval: 10s
       multiplier: 2
+
+
