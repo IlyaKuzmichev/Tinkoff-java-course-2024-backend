@@ -24,6 +24,8 @@ import java.time.OffsetDateTime;
 @TestPropertySource(locations = "classpath:test")
 public class LinearRetryScrapperClientTest {
     private static final String CHAT_ENDPOINT_PREFIX = "/tg-chat/";
+    private static final String LINKS_ENDPOINT = "/links";
+    private static final String TG_CHAT_ID_HEADER = "Tg-Chat-Id";
     private static final Long chatId = 1984L;
 
     private static WireMockServer wireMockServer;
@@ -62,5 +64,31 @@ public class LinearRetryScrapperClientTest {
         WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId)));
         log.debug("End of linear retry test");
         log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
+    }
+
+    @Test
+    public void testRetriesOnDeleteMethod() {
+        WireMock.stubFor(WireMock.delete(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId))
+            .willReturn(WireMock.aResponse()
+                .withStatus(HttpStatus.SC_BAD_GATEWAY)
+                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+        StepVerifier.create(restScrapperClient.deleteChat(chatId))
+            .verifyError();
+
+        WireMock.verify(WireMock.deleteRequestedFor(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId)));
+    }
+
+    @Test
+    public void testRetriesOnGetMethod() {
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(LINKS_ENDPOINT))
+            .withHeader(TG_CHAT_ID_HEADER, WireMock.equalTo(chatId.toString()))
+            .willReturn(WireMock.aResponse()
+                .withStatus(HttpStatus.SC_SERVICE_UNAVAILABLE)
+                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+        StepVerifier.create(restScrapperClient.listLinks(chatId))
+            .verifyError();
+
+        WireMock.verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/links"))
+            .withHeader(TG_CHAT_ID_HEADER, WireMock.equalTo(chatId.toString())));
     }
 }

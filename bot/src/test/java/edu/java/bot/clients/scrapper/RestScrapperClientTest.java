@@ -80,10 +80,10 @@ public class RestScrapperClientTest {
             .willReturn(WireMock.aResponse()
                 .withStatus(HttpStatus.SC_OK)
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
-        StepVerifier.create(restScrapperClient.registerChat(chatId))
+        StepVerifier.create(restScrapperClient.deleteChat(chatId))
             .verifyComplete();
 
-        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId)));
+        WireMock.verify(WireMock.deleteRequestedFor(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId)));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class RestScrapperClientTest {
                 ((CustomClientException) throwable).getClientErrorResponse().exceptionMessage().equals("Chat id for user not found"))
             .verify();
 
-        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId)));
+        WireMock.verify(WireMock.deleteRequestedFor(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId)));
     }
 
     @Test
