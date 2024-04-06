@@ -11,16 +11,16 @@ public record ApplicationConfig(
     String telegramToken,
     KafkaConfig kafkaConfig
 ) {
-    public record KafkaConfig (
+    public record KafkaConfig(
         String bootstrapServers,
         TopicLinkUpdates topicLinkUpdates,
         TopicLinkUpdatesDlq topicLinkUpdatesDlq
     ) {
-        public record TopicLinkUpdates (
+        public record TopicLinkUpdates(
             String name
         ) {}
 
-        public record TopicLinkUpdatesDlq (
+        public record TopicLinkUpdatesDlq(
             String name,
             Integer partitions,
             Integer replicas

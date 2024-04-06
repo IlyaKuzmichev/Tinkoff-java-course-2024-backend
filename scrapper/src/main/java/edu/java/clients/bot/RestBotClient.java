@@ -4,8 +4,6 @@ import edu.java.clients.bot.dto.ClientErrorResponse;
 import edu.java.clients.bot.dto.LinkUpdateRequest;
 import edu.java.clients.exception.CustomClientException;
 import edu.java.clients.retries.RetryFilter;
-import java.net.URI;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
@@ -31,11 +29,11 @@ public class RestBotClient implements BotClient {
     }
 
     @Override
-    public Mono<Void> sendUpdates(Long id, URI url, String description, List<Long> tgChatIds) {
+    public Mono<Void> sendUpdates(LinkUpdateRequest updateRequest) {
         return webClient
             .post()
             .uri(UPDATES_ENDPOINT)
-            .bodyValue(new LinkUpdateRequest(id, url, description, tgChatIds))
+            .bodyValue(updateRequest)
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response ->
                 response.bodyToMono(ClientErrorResponse.class)

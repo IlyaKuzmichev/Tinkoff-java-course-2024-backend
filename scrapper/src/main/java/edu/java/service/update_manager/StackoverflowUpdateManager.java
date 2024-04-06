@@ -1,31 +1,24 @@
 package edu.java.service.update_manager;
 
-import edu.java.clients.bot.BotClient;
+import edu.java.clients.bot.dto.LinkUpdateRequest;
 import edu.java.models.Link;
 import edu.java.models.StackoverflowLinkInfo;
 import edu.java.service.LinkService;
 import edu.java.service.UserService;
 import edu.java.service.update_checker.StackoverflowUpdateChecker;
+import edu.java.service.update_sender.LinkUpdateSenderService;
 import java.util.Collection;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class StackoverflowUpdateManager implements UpdateManager {
     private final StackoverflowUpdateChecker stackoverflowUpdateChecker;
     private final LinkService linkService;
     private final UserService userService;
-    private final BotClient botClient;
-
-    public StackoverflowUpdateManager(
-        StackoverflowUpdateChecker stackoverflowUpdateChecker,
-        LinkService linkService, UserService userService, BotClient botClient
-    ) {
-        this.stackoverflowUpdateChecker = stackoverflowUpdateChecker;
-        this.linkService = linkService;
-        this.userService = userService;
-        this.botClient = botClient;
-    }
+    private final LinkUpdateSenderService linkUpdateSenderService;
 
     @Override
     public void execute(Collection<Link> links) {
@@ -35,12 +28,12 @@ public class StackoverflowUpdateManager implements UpdateManager {
                 StackoverflowLinkInfo oldInfo =
                     (StackoverflowLinkInfo) linkService.updateStackoverflowLink(linkInfo);
                 Optional<String> answer = prepareResponseMessage(linkInfo, oldInfo);
-                answer.ifPresent(s -> botClient.sendUpdates(
+                answer.ifPresent(s -> linkUpdateSenderService.sendUpdate(new LinkUpdateRequest(
                     link.getId(),
                     link.getUrl(),
                     s,
-                    userService.getUsersTrackLink(link)
-                ).block());
+                    userService.getUsersTrackLink(link))
+                ));
             }
         }
     }
