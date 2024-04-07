@@ -51,4 +51,20 @@ public class KafkaScrapperManualTest {
             );
         }
     }
+
+    @Test
+    public void testKafkaProducerMessagewithNullField() {
+        LinkUpdateRequest request = new LinkUpdateRequest(
+            1L,
+            URI.create("http://example.com"),
+           null,
+            List.of(754277913L)
+        );
+
+        linkUpdateRequestKafkaTemplate.send(
+            config.kafkaConfig().topicLinkUpdates().name(),
+            request.id(),
+            request
+        );
+    }
 }

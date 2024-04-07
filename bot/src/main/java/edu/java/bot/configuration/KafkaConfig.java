@@ -6,8 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.LongDeserializer;
-import org.apache.kafka.common.serialization.LongSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -17,9 +18,12 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration
 @EnableKafka
@@ -52,22 +56,28 @@ public class KafkaConfig {
             JsonDeserializer.VALUE_DEFAULT_TYPE, LinkUpdateRequest.class
         )));
 
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
+            linkUpdatesDlqKafkaTemplate(linkUpdatesRequestDlqProducerFactory()),
+            (r, e) -> new TopicPartition(config.kafkaConfig().topicLinkUpdatesDlq().name(),
+                r.partition() % config.kafkaConfig().topicLinkUpdatesDlq().partitions()));
+
+        factory.setCommonErrorHandler(new DefaultErrorHandler(recoverer, new FixedBackOff(0L, 0L)));
+
         return factory;
     }
 
     @Bean
-    ProducerFactory<Long, LinkUpdateRequest> linkUpdatesRequestDlqProducerFactory() {
+    ProducerFactory<?, ?> linkUpdatesRequestDlqProducerFactory() {
         return new DefaultKafkaProducerFactory<>(Map.of(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.kafkaConfig().bootstrapServers(),
-            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class,
-            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class,
-            JsonSerializer.ADD_TYPE_INFO_HEADERS, false
+            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, JsonSerializer.class,
+            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class
         ));
     }
 
     @Bean
-    public KafkaTemplate<Long, LinkUpdateRequest> linkUpdatesDlqKafkaTemplate(
-        ProducerFactory<Long, LinkUpdateRequest> linkUpdatesRequestDlqProducerFactory
+    public KafkaTemplate<?, ?> linkUpdatesDlqKafkaTemplate(
+        ProducerFactory<?, ?> linkUpdatesRequestDlqProducerFactory
     ) {
         return new KafkaTemplate<>(linkUpdatesRequestDlqProducerFactory);
     }

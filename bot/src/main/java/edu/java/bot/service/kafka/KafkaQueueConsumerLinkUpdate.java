@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class KafkaQueueConsumerLinkUpdate {
     private final ApplicationConfig config;
     private final UpdateNotifierService updateNotifierService;
-    private final KafkaTemplate<Long, LinkUpdateRequest> linkUpdatesDlqKafkaTemplate;
+    private final KafkaTemplate<Long, byte[]> linkUpdatesDlqKafkaTemplate;
 
     @KafkaListener(groupId = "listeners.link.update",
                    topics = "${app.kafka-config.topic-link-updates.name}",
@@ -34,16 +34,15 @@ public class KafkaQueueConsumerLinkUpdate {
                 linkUpdateRequest.url(),
                 linkUpdateRequest.tgChatIds()
             );
-        } catch (Exception e) {
-            log.error("Error with message parsing from Kafka");
+        } catch (NullPointerException e) {
+            log.error("Error with message parsing from Kafka, some fields of DTO are null");
             log.error(e.getMessage());
 
             linkUpdatesDlqKafkaTemplate.send(
                 config.kafkaConfig().topicLinkUpdatesDlq().name(),
                 linkUpdateRequest.id(),
-                linkUpdateRequest
+                linkUpdateRequest.toString().getBytes()
             );
         }
     }
-
 }
