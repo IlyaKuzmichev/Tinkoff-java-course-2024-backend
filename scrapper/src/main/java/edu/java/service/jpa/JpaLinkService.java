@@ -14,6 +14,7 @@ import edu.java.domain.jpa.entities.Users;
 import edu.java.domain.mappers.GithubLinkInfoMapper;
 import edu.java.domain.mappers.StackoverflowLinkInfoMapper;
 import edu.java.exception.AttemptAddLinkOneMoreTimeException;
+import edu.java.exception.CorruptedDataException;
 import edu.java.exception.IncorrectRequestParametersException;
 import edu.java.exception.IncorrectUserStatusException;
 import edu.java.exception.LinkNotFoundException;
@@ -122,7 +123,8 @@ public class JpaLinkService implements LinkService {
         Long linkId = linkInfo.getLink().getId();
         resetLinkUpdateTime(linkId);
 
-        var linkEntity = githubLinkRepository.findGithubLinksById(linkId);
+        GithubLinks linkEntity = githubLinkRepository.findGithubLinksById(linkId)
+            .orElseThrow(() -> new CorruptedDataException("Bad Github link data"));
         GithubLinkInfo oldLinkInfo = GithubLinkInfoMapper.entityToLinkInfo(linkEntity);
         GithubLinkInfoMapper.linkInfoToEntity(linkInfo, linkEntity);
         githubLinkRepository.save(linkEntity);
@@ -135,7 +137,8 @@ public class JpaLinkService implements LinkService {
         Long linkId = linkInfo.getLink().getId();
         resetLinkUpdateTime(linkId);
 
-        var linkEntity = stackoverflowLinkRepository.findStackoverflowLinksById(linkId);
+        var linkEntity = stackoverflowLinkRepository.findStackoverflowLinksById(linkId)
+            .orElseThrow(() -> new CorruptedDataException("Bad Stackoverflow link data"));
         StackoverflowLinkInfo oldLinkInfo = StackoverflowLinkInfoMapper.entityToLinkInfo(linkEntity);
         StackoverflowLinkInfoMapper.linkInfoToEntity(linkInfo, linkEntity);
         stackoverflowLinkRepository.save(linkEntity);
