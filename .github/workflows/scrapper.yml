@@ -39,10 +39,10 @@ jobs:
           update-comment: true
 
       - name: build and push docker image
-          run: |
-            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker build -t ghcr.io/${{ github.repository_owner }}/scrapper:latest -f scrapper.Dockerfile .
-            docker push ghcr.io/${{ github.repository_owner }}/scrapper:latest
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker build -t ghcr.io/${{ github.repository_owner }}/scrapper:latest -f scrapper.Dockerfile .
+          docker push ghcr.io/${{ github.repository_owner }}/scrapper:latest
 
   checkstyle:
     name: checkstyle
