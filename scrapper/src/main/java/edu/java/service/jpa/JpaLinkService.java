@@ -30,7 +30,6 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,9 +61,10 @@ public class JpaLinkService implements LinkService {
             addLinkToTables(link);
         }
 
-        if (userTrackedLinkRepository.findUserTrackedLinksByUserIdAndLinkId(chatId, link.getId()).isPresent()) {
-            throw new AttemptAddLinkOneMoreTimeException("You're already track this link");
-        }
+        userTrackedLinkRepository.findUserTrackedLinksByUserIdAndLinkId(chatId, link.getId())
+            .ifPresent(trackedLink -> {
+                throw new AttemptAddLinkOneMoreTimeException("You're already track this link");
+            });
         UserTrackedLinks subscription = new UserTrackedLinks();
         subscription.setId(new UserTrackedLinksPK(chatId, link.getId()));
         userTrackedLinkRepository.save(subscription);
@@ -76,32 +76,26 @@ public class JpaLinkService implements LinkService {
     public Link removeLinkByURL(Long chatId, URI url) {
         Users user = checkUserAbility(chatId, User.Status.UNTRACK_LINK);
 
-        var optLink = linkRepository.findByUrlIgnoreCase(url.toString());
-        if (optLink.isEmpty()) {
-            throw new LinkNotFoundException("Link is not tracking by the service");
-        }
-        Links link = optLink.get();
+        Links link = linkRepository.findByUrlIgnoreCase(url.toString())
+            .orElseThrow(() -> new LinkNotFoundException("Link is not tracking by the service"));
 
-        var optSubscription = userTrackedLinkRepository.findUserTrackedLinksByUserAndLink(user, link);
+        userTrackedLinkRepository.findUserTrackedLinksByUserAndLink(user, link)
+            .orElseThrow(() -> new LinkNotFoundException("You don't track this link"));
 
-        if (optSubscription.isEmpty()) {
-            throw new LinkNotFoundException("You don't track this link");
-        }
         userTrackedLinkRepository.deleteByUserAndLink(user, link);
         if (userTrackedLinkRepository.findAllByLinkId(link.getId()).isEmpty()) {
             linkRepository.deleteById(link.getId());
         }
+
         return new Link(link.getId(), URI.create(link.getUrl()));
     }
 
     @Override
     public Collection<Link> findAllLinksForUser(Long chatId) {
-        Optional<Users> user = userRepository.findUsersById(chatId);
-        if (user.isEmpty()) {
-            throw new UserIdNotFoundException(chatId);
-        }
-        return user.get()
-            .getTrackedLinks()
+        Users user = userRepository.findUsersById(chatId)
+            .orElseThrow(() -> new UserIdNotFoundException(chatId));
+
+        return user.getTrackedLinks()
             .stream()
             .map(UserTrackedLinks::getLink)
             .map(link -> new Link(link.getId(), URI.create(link.getUrl())))
@@ -146,11 +140,9 @@ public class JpaLinkService implements LinkService {
     }
 
     private Users checkUserAbility(Long userId, User.Status status) {
-        var optUser = userRepository.findById(userId);
-        if (optUser.isEmpty()) {
-            throw new UserIdNotFoundException(userId);
-        }
-        Users user = optUser.get();
+        var user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserIdNotFoundException(userId));
+
         if (user.getUserStatus() != status) {
             throw new IncorrectUserStatusException(userId);
         }
