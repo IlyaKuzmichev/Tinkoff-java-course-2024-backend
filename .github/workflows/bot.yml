@@ -40,8 +40,9 @@ jobs:
       - name: build and push docker image
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker build -t ghcr.io/${{ github.repository_owner }}/bot:latest -f bot.Dockerfile .
-          docker push ghcr.io/${{ github.repository_owner }}/bot:latest
+          REPOSITORY_NAME=$(echo "${{ github.repository_owner }}/bot" | tr '[:upper:]' '[:lower:]')
+          docker build -t ghcr.io/$REPOSITORY_NAME:latest -f bot.Dockerfile .
+          docker push ghcr.io/$REPOSITORY_NAME:latest
 
   checkstyle:
     name: checkstyle

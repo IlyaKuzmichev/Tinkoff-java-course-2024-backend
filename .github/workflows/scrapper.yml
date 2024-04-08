@@ -41,8 +41,9 @@ jobs:
       - name: build and push docker image
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker build -t ghcr.io/${{ github.repository_owner }}/scrapper:latest -f scrapper.Dockerfile .
-          docker push ghcr.io/${{ github.repository_owner }}/scrapper:latest
+          REPOSITORY_NAME=$(echo "${{ github.repository_owner }}/scrapper" | tr '[:upper:]' '[:lower:]')
+          docker build -t ghcr.io/$REPOSITORY_NAME:latest -f scrapper.Dockerfile .
+          docker push ghcr.io/$REPOSITORY_NAME:latest
 
   checkstyle:
     name: checkstyle
