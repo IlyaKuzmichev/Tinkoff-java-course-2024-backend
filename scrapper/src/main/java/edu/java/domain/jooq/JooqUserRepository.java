@@ -17,7 +17,6 @@ import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class JooqUserRepository {
@@ -29,7 +28,6 @@ public class JooqUserRepository {
         this.dslContext = dslContext;
     }
 
-    @Transactional
     public void addUser(User user) {
         try {
             dslContext
@@ -43,7 +41,6 @@ public class JooqUserRepository {
         }
     }
 
-    @Transactional
     public void updateUser(User user) {
         int rowsAffected = dslContext
             .update(Users.USERS)
@@ -56,7 +53,6 @@ public class JooqUserRepository {
         }
     }
 
-    @Transactional
     public void removeUser(Long userId) {
         int rowsAffected = dslContext
             .deleteFrom(Users.USERS)
@@ -67,7 +63,6 @@ public class JooqUserRepository {
         }
     }
 
-    @Transactional
     public Optional<User> findUser(Long userId) {
         return dslContext
             .selectFrom(Users.USERS)
@@ -77,7 +72,6 @@ public class JooqUserRepository {
                 Objects.requireNonNull(rec.getUserStatus()).toString())));
     }
 
-    @Transactional(readOnly = true)
     public List<User> findAllUsers() {
         return dslContext
             .selectFrom(Users.USERS)
@@ -86,7 +80,6 @@ public class JooqUserRepository {
                 Objects.requireNonNull(rec.getUserStatus()).toString())));
     }
 
-    @Transactional(readOnly = true)
     public List<Long> findUsersTrackLink(Link link) {
         return dslContext
             .selectFrom(UserTrackedLinks.USER_TRACKED_LINKS)

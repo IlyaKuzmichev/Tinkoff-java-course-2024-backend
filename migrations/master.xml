@@ -8,5 +8,6 @@
        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <include file="initial_schema.sql"/>
+    <include file="add_enum_cast.sql"/>
 
 </databaseChangeLog>

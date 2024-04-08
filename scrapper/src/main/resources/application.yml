@@ -4,7 +4,7 @@ app:
     invoke-interval: 5s
     force-check-delay: 10s
     check-interval: 300s
-  database-access-type: jdbc
+  database-access-type: jpa
 
 client:
   github:
@@ -24,6 +24,11 @@ spring:
     url: jdbc:postgresql://localhost:5432/scrapper
     username: postgres
     password: postgres
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 springdoc:
   swagger-ui:
