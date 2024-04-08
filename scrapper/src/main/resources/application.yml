@@ -3,9 +3,9 @@ app:
     enable: true
     invoke-interval: 5s
     force-check-delay: 10s
-    check-interval: 60s
+    check-interval: 180s
   database-access-type: jpa
-  use-queue: true
+  use-queue: false
   kafka-config:
     bootstrap-servers: localhost:9091,localhost:9092,localhost:9093
     topic-link-updates:

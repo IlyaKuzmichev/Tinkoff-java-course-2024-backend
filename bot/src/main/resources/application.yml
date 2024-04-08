@@ -8,6 +8,10 @@ app:
       name: api.scrapper.updates.dlq
       partitions: 2
       replicas: 2
+  micrometer:
+    processed-message-counter:
+      name: message.processed
+      description: Processed messages quantity from telegram API
 
 client:
   scrapper:
