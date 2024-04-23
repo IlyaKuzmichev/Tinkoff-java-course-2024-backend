@@ -1,35 +1,27 @@
 package edu.java.service.update_manager;
 
-import edu.java.clients.bot.BotClient;
+import edu.java.clients.bot.dto.LinkUpdateRequest;
 import edu.java.models.GithubLinkInfo;
 import edu.java.models.Link;
 import edu.java.service.LinkService;
 import edu.java.service.UserService;
 import edu.java.service.update_checker.GithubUpdateChecker;
+import edu.java.service.update_sender.LinkUpdateSenderService;
 import java.util.Collection;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class GithubUpdateManager implements UpdateManager {
     private final GithubUpdateChecker gitHubUpdateChecker;
     private final LinkService linkService;
     private final UserService userService;
-    private final BotClient botClient;
+    private final LinkUpdateSenderService linkUpdateSenderService;
 
-    @Autowired
-    public GithubUpdateManager(
-        GithubUpdateChecker gitHubUpdateChecker,
-        LinkService linkService, UserService userService, BotClient botClient
-    ) {
-        this.gitHubUpdateChecker = gitHubUpdateChecker;
-        this.linkService = linkService;
-        this.userService = userService;
-        this.botClient = botClient;
-    }
 
     @Override
     public void execute(Collection<Link> links) {
@@ -39,12 +31,12 @@ public class GithubUpdateManager implements UpdateManager {
                     GithubLinkInfo linkInfo = gitHubUpdateChecker.checkUpdates(link);
                     GithubLinkInfo oldInfo = (GithubLinkInfo) linkService.updateGithubLink(linkInfo);
                     Optional<String> answer = prepareResponseMessage(linkInfo, oldInfo);
-                    answer.ifPresent(s -> botClient.sendUpdates(
+                    answer.ifPresent(s -> linkUpdateSenderService.sendUpdate(new LinkUpdateRequest(
                         link.getId(),
                         link.getUrl(),
                         s,
-                        userService.getUsersTrackLink(link)
-                    ).block());
+                        userService.getUsersTrackLink(link))
+                    ));
                 } catch (RuntimeException e) {
                     log.debug(e.getMessage());
                 }

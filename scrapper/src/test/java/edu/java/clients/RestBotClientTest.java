@@ -3,6 +3,7 @@ package edu.java.clients;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.clients.bot.RestBotClient;
+import edu.java.clients.bot.dto.LinkUpdateRequest;
 import edu.java.clients.exception.CustomClientException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,7 +57,7 @@ public class RestBotClientTest extends IntegrationEnvironment {
                 .withStatus(HttpStatus.SC_OK)
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
 
-        StepVerifier.create(restBotClient.sendUpdates(id, url, DESCRIPTION, chatIds))
+        StepVerifier.create(restBotClient.sendUpdates(new LinkUpdateRequest(id, url, DESCRIPTION, chatIds)))
             .verifyComplete();
 
         WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(UPDATES_ENDPOINT)));
@@ -71,7 +72,7 @@ public class RestBotClientTest extends IntegrationEnvironment {
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBody("{\"description\": \"Not Found\", \"code\": \"404\"}")));
 
-        StepVerifier.create(restBotClient.sendUpdates(id, url, DESCRIPTION, chatIds))
+        StepVerifier.create(restBotClient.sendUpdates(new LinkUpdateRequest(id, url, DESCRIPTION, chatIds)))
             .expectErrorMatches(throwable -> throwable instanceof CustomClientException &&
                     ((CustomClientException) throwable).getClientErrorResponse().description().equals("Not Found") &&
                     ((CustomClientException) throwable).getClientErrorResponse().code().equals("404"))
@@ -91,7 +92,7 @@ public class RestBotClientTest extends IntegrationEnvironment {
             .willReturn(WireMock.aResponse()
                 .withStatus(HttpStatus.SC_BAD_GATEWAY)
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
-        StepVerifier.create(restBotClient.sendUpdates(id, url, DESCRIPTION, chatIds))
+        StepVerifier.create(restBotClient.sendUpdates(new LinkUpdateRequest(id, url, DESCRIPTION, chatIds)))
             .verifyError();
 
         WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(UPDATES_ENDPOINT)));
@@ -110,7 +111,7 @@ public class RestBotClientTest extends IntegrationEnvironment {
             .willReturn(WireMock.aResponse()
                 .withStatus(HttpStatus.SC_NOT_IMPLEMENTED)
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
-        StepVerifier.create(restBotClient.sendUpdates(id, url, DESCRIPTION, chatIds))
+        StepVerifier.create(restBotClient.sendUpdates(new LinkUpdateRequest(id, url, DESCRIPTION, chatIds)))
             .verifyError();
 
         WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(UPDATES_ENDPOINT)));

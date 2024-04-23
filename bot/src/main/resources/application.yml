@@ -1,5 +1,13 @@
 app:
   telegram-token: ${TELEGRAM_TOKEN}
+  kafka-config:
+    bootstrap-servers: localhost:9091,localhost:9092,localhost:9093
+    topic-link-updates:
+      name: api.scrapper.updates
+    topic-link-updates-dlq:
+      name: api.scrapper.updates.dlq
+      partitions: 2
+      replicas: 2
 
 client:
   scrapper:
@@ -56,3 +64,5 @@ retry:
       initial-interval: 1s
       maximum-interval: 10s
       multiplier: 2
+
+
