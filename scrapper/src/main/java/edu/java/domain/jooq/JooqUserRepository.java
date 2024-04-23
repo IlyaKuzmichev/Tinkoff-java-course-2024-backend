@@ -35,9 +35,7 @@ public class JooqUserRepository {
                 .set(Users.USERS.ID, user.getUserId())
                 .execute();
         } catch (DuplicateKeyException e) {
-            throw new AttemptDoubleRegistrationException(
-                String.format("User with ID %d already exists", user.getUserId())
-            );
+            throw new AttemptDoubleRegistrationException(user.getUserId());
         }
     }
 

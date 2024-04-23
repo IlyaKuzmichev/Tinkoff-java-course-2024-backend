@@ -29,6 +29,55 @@ spring:
     hibernate:
       ddl-auto: validate
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  cache:
+    jcache:
+      provider: com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider
+    caffeine:
+      spec: maximumSize=100000,expireAfterAccess=3600s
+    cache-names:
+      - rate-limit-buckets-scrapper
+
+bucket4j:
+  enabled: true
+  default-metric-tags:
+    - key: IP
+      expression: getRemoteAddr()
+      types: REJECTED_COUNTER
+  filters:
+    - id: filter-chat
+      cache-name: rate-limit-buckets-scrapper
+      url: /tg-chat/.*
+      http-content-type: application/json
+      http-status-code: TOO_MANY_REQUESTS
+      http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests\", \"message\": \"You have exhausted your API Request Quota for /tg-chat endpoint\" }"
+      rate-limits:
+        - cache-key: getRemoteAddr()
+          num-tokens: 1
+          bandwidths:
+            - id: bandwidths-tg-chat
+              capacity: 100
+              time: 1
+              unit: minutes
+              refill-speed: interval
+      metrics:
+        enabled: true
+    - id: filter-links
+      cache-name: rate-limit-buckets-scrapper
+      url: /links
+      http-content-type: application/json
+      http-status-code: TOO_MANY_REQUESTS
+      http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests\", \"message\": \"You have exhausted your API Request Quota for /links endpoint\" }"
+      rate-limits:
+        - cache-key: getRemoteAddr()
+          num-tokens: 1
+          bandwidths:
+            - id: bandwidths-links
+              capacity: 100
+              time: 1
+              unit: minutes
+              refill-speed: interval
+      metrics:
+        enabled: true
 
 springdoc:
   swagger-ui:
@@ -39,3 +88,18 @@ server:
 
 logging:
   config: classpath:log4j2-plain.xml
+
+retry:
+  attempts: 3
+  status-codes: 500, 502, 503, 504
+  type: exponential
+  backoff-config:
+    constant:
+      initial-interval: 1s
+    linear:
+      initial-interval: 1s
+      maximum-interval: 10s
+    exponential:
+      initial-interval: 1s
+      maximum-interval: 10s
+      multiplier: 2

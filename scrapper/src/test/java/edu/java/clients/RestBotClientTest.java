@@ -6,8 +6,10 @@ import edu.java.clients.bot.RestBotClient;
 import edu.java.clients.exception.CustomClientException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import edu.java.scrapper.IntegrationEnvironment;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,10 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import reactor.test.StepVerifier;
 
 @SpringBootTest
+@Slf4j
 @DirtiesContext
+@TestPropertySource(locations = "classpath:test")
 public class RestBotClientTest extends IntegrationEnvironment {
     private static final String UPDATES_ENDPOINT = "/updates";
     private static final String DESCRIPTION = "Description";
@@ -73,5 +78,43 @@ public class RestBotClientTest extends IntegrationEnvironment {
             .verify();
 
         WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(UPDATES_ENDPOINT)));
+    }
+
+    @Test
+    public void testRetriesWorkingWithExistingStatusCode() throws URISyntaxException {
+        URI url = new URI("https://example.com");
+        log.debug("Start of linear retry test");
+        log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
+
+
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UPDATES_ENDPOINT))
+            .willReturn(WireMock.aResponse()
+                .withStatus(HttpStatus.SC_BAD_GATEWAY)
+                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+        StepVerifier.create(restBotClient.sendUpdates(id, url, DESCRIPTION, chatIds))
+            .verifyError();
+
+        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(UPDATES_ENDPOINT)));
+        log.debug("End of linear retry test");
+        log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
+    }
+
+    @Test
+    public void testRetriesNotWorkingWithNotExistingStatusCode() throws URISyntaxException {
+        URI url = new URI("https://example.com");
+        log.debug("Start of linear retry test");
+        log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
+
+
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UPDATES_ENDPOINT))
+            .willReturn(WireMock.aResponse()
+                .withStatus(HttpStatus.SC_NOT_IMPLEMENTED)
+                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+        StepVerifier.create(restBotClient.sendUpdates(id, url, DESCRIPTION, chatIds))
+            .verifyError();
+
+        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(UPDATES_ENDPOINT)));
+        log.debug("End of linear retry test");
+        log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
     }
 }

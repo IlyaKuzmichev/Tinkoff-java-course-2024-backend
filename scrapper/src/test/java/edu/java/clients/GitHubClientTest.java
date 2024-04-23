@@ -3,21 +3,27 @@ package edu.java.clients;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.clients.github.GitHubClient;
+import edu.java.scrapper.IntegrationEnvironment;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import edu.java.scrapper.IntegrationEnvironment;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.test.StepVerifier;
 
 @SpringBootTest
+@Slf4j
 @DirtiesContext
+@TestPropertySource(locations = "classpath:test")
 public class GitHubClientTest extends IntegrationEnvironment {
 
     private static WireMockServer wireMockServer;
@@ -94,5 +100,26 @@ public class GitHubClientTest extends IntegrationEnvironment {
             .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
                 ((WebClientResponseException) throwable).getStatusCode() == HttpStatus.BAD_REQUEST)
             .verify();
+    }
+
+    @Disabled
+    @Test
+    public void testRetriesWorkingWithExistingStatusCode() {
+        log.debug("Start of retry test for GitHub");
+        log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
+        String repositoryName = "Repo";
+        String ownerName = "Owner";
+
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/repos/" + ownerName + "/" + repositoryName))
+            .willReturn(WireMock.aResponse()
+                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+
+        StepVerifier.create(gitHubClient.fetchRepository(ownerName, repositoryName))
+                .verifyError();
+
+        WireMock.verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/repos/" + ownerName + "/" + repositoryName)));
+        log.debug("End of linear retry test for GitHub");
+        log.debug("Time: %s".formatted(OffsetDateTime.now().toString()));
     }
 }

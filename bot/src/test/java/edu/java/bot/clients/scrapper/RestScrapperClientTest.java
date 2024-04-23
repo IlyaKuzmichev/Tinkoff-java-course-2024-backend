@@ -3,6 +3,7 @@ package edu.java.bot.clients.scrapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.bot.clients.scrapper.exception.CustomClientException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import reactor.test.StepVerifier;
 import java.net.URI;
@@ -18,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
+@Slf4j
+@DirtiesContext
 @TestPropertySource(locations = "classpath:test")
 public class RestScrapperClientTest {
     private static final String CHAT_ENDPOINT_PREFIX = "/tg-chat/";
@@ -76,10 +80,10 @@ public class RestScrapperClientTest {
             .willReturn(WireMock.aResponse()
                 .withStatus(HttpStatus.SC_OK)
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
-        StepVerifier.create(restScrapperClient.registerChat(chatId))
+        StepVerifier.create(restScrapperClient.deleteChat(chatId))
             .verifyComplete();
 
-        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId)));
+        WireMock.verify(WireMock.deleteRequestedFor(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId)));
     }
 
     @Test
@@ -98,7 +102,7 @@ public class RestScrapperClientTest {
                 ((CustomClientException) throwable).getClientErrorResponse().exceptionMessage().equals("Chat id for user not found"))
             .verify();
 
-        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId)));
+        WireMock.verify(WireMock.deleteRequestedFor(WireMock.urlEqualTo(CHAT_ENDPOINT_PREFIX + chatId)));
     }
 
     @Test

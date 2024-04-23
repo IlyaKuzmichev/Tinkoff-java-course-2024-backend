@@ -14,7 +14,6 @@ import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 public class JpaUserService implements UserService {
-    private static final String USER_EXCEPTION_FORMAT = "User with ID %d %s";
     private final JpaUserRepository userRepository;
     private final JpaUserTrackedLinkRepository userTrackedLinkRepository;
 
@@ -32,8 +31,7 @@ public class JpaUserService implements UserService {
         Long userId = user.getUserId();
         var optUser = userRepository.findById(userId);
         if (optUser.isPresent()) {
-            throw new AttemptDoubleRegistrationException(
-                USER_EXCEPTION_FORMAT.formatted(userId, "already exists"));
+            throw new AttemptDoubleRegistrationException(userId);
         }
 
         Users newUser = new Users(userId, User.Status.BASE, new ArrayList<>());

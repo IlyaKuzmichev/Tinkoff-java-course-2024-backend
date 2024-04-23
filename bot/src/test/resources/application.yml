@@ -10,6 +10,27 @@ spring:
     name: bot
   jackson:
     time-zone: UTC
+  cache:
+    jcache:
+      provider: com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider
+    caffeine:
+      spec: maximumSize=100000,expireAfterAccess=3600s
+    cache-names:
+      - rate-limit-buckets-bot
+
+bucket4j:
+  enabled: true
+  filters:
+    - cache-name: rate-limit-buckets-bot
+      url: /.*
+      http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests\", \"message\": \"You have exhausted your API Request Quota\" }"
+      rate-limits:
+        - cache-key: getRemoteAddr()
+          bandwidths:
+            - capacity: 7
+              time: 1
+              unit: minutes
+              refill-speed: interval
 
 springdoc:
   swagger-ui:
@@ -20,3 +41,18 @@ server:
 
 logging:
   config: classpath:log4j2-plain.xml
+
+retry:
+  attempts: 3
+  status-codes: 500, 502, 503, 504
+  type: linear
+  backoff-config:
+    constant:
+      initial-interval: 1s
+    linear:
+      initial-interval: 1s
+      maximum-interval: 10s
+    exponential:
+      initial-interval: 1s
+      maximum-interval: 10s
+      multiplier: 2

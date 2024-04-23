@@ -3,6 +3,7 @@ package edu.java.clients.bot;
 import edu.java.clients.bot.dto.ClientErrorResponse;
 import edu.java.clients.bot.dto.LinkUpdateRequest;
 import edu.java.clients.exception.CustomClientException;
+import edu.java.clients.retries.RetryFilter;
 import java.net.URI;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,15 @@ public class RestBotClient implements BotClient {
     private final WebClient webClient;
 
     @Autowired
-    public RestBotClient(WebClient.Builder webClientBuilder, @Value("${client.bot.base-url:http://localhost:8090}") String baseUrl) {
-        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
+    public RestBotClient(
+        WebClient.Builder webClientBuilder,
+        RetryFilter retryFilter,
+        @Value("${client.bot.base-url:http://localhost:8090}") String baseUrl
+    ) {
+        this.webClient = webClientBuilder
+            .baseUrl(baseUrl)
+            .filter(retryFilter)
+            .build();
     }
 
     @Override

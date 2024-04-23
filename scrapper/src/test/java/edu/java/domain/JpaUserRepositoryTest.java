@@ -12,6 +12,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @DirtiesContext
+@TestPropertySource(locations = "classpath:test")
 public class JpaUserRepositoryTest extends IntegrationEnvironment {
     private static final String INSERT_USER = "INSERT INTO users(id) VALUES (?)";
     private static final String SELECT_USER = "SELECT id FROM users";
