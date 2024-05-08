@@ -105,12 +105,39 @@ services:
     depends_on:
       - zookeeper
 
+  prometheus:
+    image: prom/prometheus:v2.51.1
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana-oss:10.1.9
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - backend
+
+
+
 volumes:
   postgresql: { }
   zookeeper_data: { }
   kafka1_data: { }
   kafka2_data: { }
   kafka3_data: { }
+  prometheus_data: { }
+  grafana_data: { }
 
 
 networks:

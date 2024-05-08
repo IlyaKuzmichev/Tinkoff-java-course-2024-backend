@@ -8,21 +8,20 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import edu.java.bot.processor.commands.Command;
 import edu.java.bot.service.ResponseService;
+import io.micrometer.core.instrument.Counter;
 import java.util.Arrays;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor
 public class MyTelegramBot implements UpdatesListener {
     private final TelegramBot bot;
     private final ResponseService responseService;
     private final List<Command> commandList;
+    private final Counter processedMessageCounter;
 
-    public MyTelegramBot(TelegramBot bot, List<Command> commandList, ResponseService responseService) {
-        this.bot = bot;
-        this.commandList = commandList;
-        this.responseService = responseService;
-    }
 
     public void start() {
         bot.execute(createMenu());
@@ -36,6 +35,7 @@ public class MyTelegramBot implements UpdatesListener {
             try {
                 if (update.message() != null && update.message().text() != null) {
                     bot.execute(new SendMessage(update.message().chat().id(), responseService.getAnswer(update)));
+                    processedMessageCounter.increment();
                 }
             } catch (RuntimeException e) {
                 log.debug(Arrays.toString(e.getStackTrace()));

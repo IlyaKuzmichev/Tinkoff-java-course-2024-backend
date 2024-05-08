@@ -9,7 +9,8 @@ import org.springframework.validation.annotation.Validated;
 public record ApplicationConfig(
     @NotEmpty
     String telegramToken,
-    KafkaConfig kafkaConfig
+    KafkaConfig kafkaConfig,
+    Micrometer micrometer
 ) {
     public record KafkaConfig(
         String bootstrapServers,
@@ -24,6 +25,15 @@ public record ApplicationConfig(
             String name,
             Integer partitions,
             Integer replicas
+        ) {}
+    }
+
+    public record Micrometer(
+        ProcessedMessageCounter processedMessageCounter
+    ) {
+        public record ProcessedMessageCounter(
+            String name,
+            String description
         ) {}
     }
 }

@@ -45,6 +45,11 @@
         <!-- Linters -->
         <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
         <checkstyle.version>10.12.7</checkstyle.version>
+
+        <!-- Metrics -->
+        <micrometer-prometheus.version>1.12.4</micrometer-prometheus.version>
+        <micrometer-tracing.version>1.2.4</micrometer-tracing.version>
+
     </properties>
 
     <modules>
@@ -60,26 +65,31 @@
                 <artifactId>java-telegram-bot-api</artifactId>
                 <version>${java-telegram-bot-api.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock-standalone</artifactId>
                 <version>${wiremock.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>2.3.0</version>
             </dependency>
+
             <dependency>
                 <groupId>com.giffing.bucket4j.spring.boot.starter</groupId>
                 <artifactId>bucket4j-spring-boot-starter</artifactId>
                 <version>${bucket4j.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>jcache</artifactId>
@@ -108,6 +118,24 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-prometheus</artifactId>
+                <version>${micrometer-prometheus.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing-bridge-brave</artifactId>
+                <version>${micrometer-tracing.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
